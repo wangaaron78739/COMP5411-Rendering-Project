@@ -28,7 +28,7 @@
 \usepackage{multicol}
 \usepackage{enumerate}
 \usepackage{enumitem}
-\setlist{nolistsep}
+% \setlist{nolistsep}
 \usepackage{graphicx}
 \usepackage{gensymb}
 \usepackage{subcaption}
@@ -89,24 +89,64 @@
 \title{
 {\LARGE COMP5411 - Advanced Computer Graphics} \\
 \textbf{\LARGE Rendering Project Proposal - Group 21} \\
-% \textbf{}
-}
-\author{ 
-\begin{tabular}{R{0.3\textwidth}L{0.4\textwidth}}
-\normalsize\textbf{Name:} & \normalsize WANG, Aaron Si-yuan \\
-\normalsize\textbf{Student ID:} & \normalsize20477053 \\
-\normalsize\textbf{Name:} & \normalsize MEDHI, Anshuman\\
-\normalsize\textbf{Student ID:} & \normalsize \\
-\end{tabular}
+\textbf{\LARGE Magnifying Lenses} % \textbf{}
 }
 
 \date{}
 
 \begin{document}
-\maketitle\thispagestyle{fancy}
-\subsection*{Project Description}
-\subsection*{Challenges}
-\subsection*{Timeline}
 
+\maketitle\thispagestyle{fancy}
+\vspace*{-4em}
+
+\subsection*{Group Background}
+\renewcommand{\arraystretch}{1.5}
+\hspace*{-3em}
+\begin{tabular}{L{0.2\textwidth}L{0.15\textwidth}L{0.75\textwidth}}
+  \textbf{Name} & \textbf{Student ID} & \textbf{Graphics Programming Experience} \\
+  Aaron Si-yuan WANG & 20477053 & Limited graphics programming experience. Only exposure is the Geometry Programming Project in the first half of this course. \\
+  
+  Anshuman MEDHI &20330657 & Taken COMP4411 last semester in which we implemented hierarchical modelling, a raytracing renderer, particle system renderer, spline based animation, inverse kinematics modelling and marching cubes rendering of metaballs \\
+\end{tabular}
+  
+
+
+\subsection*{Project Description}
+For our COMP5411 Rendering project, we will be a realistic rendering of magnifying lenses. This will involve simulating the light dispersion and distortion through the lenses onto the scene and objects behind the lens. 
+We will provide an interactive environment to allow the user to move the magnifying lens around and adjust the different parameters of the lens. 
+We will aim to implement the following features: 
+
+\begin{itemize}
+  \item Varying parameters of the lens (geometric properties)
+  \begin{itemize}
+    \item Calculate the optical parameters from the geometric description
+  \end{itemize}
+  \item Varying the lighting and objects in the scene behind the lenses
+  \item Multiple lenses interaction
+  \item Interactively move around the lenses in 3D space
+  \item Simulating light dispersion through the lenses (chromatic aberrations)
+  \item Simulating various kinds of lens distortions (such as barrel or pincushion distortion)
+  \item Rendering realistic lens flare
+\end{itemize}
+
+\subsection*{Challenges}
+The most obvious way to simulate lenses is through raytracing the light going through the lens.
+Instead we must find and deploy approximations that can achieve the same effect using the rasterizing and shader approach that can run on the GPU in real-time. \\
+
+We will be aiming for as realistic-looking simulation of lenses as possible, including various distortion effects not commonly included. In addition, we will be able to make use of various techniques learned in class, such as vertex and pixel shading.
+As such, this will provide us with an interesting and suitable challenge.
+
+\subsection*{Weekly Timeline}
+\begin{itemize}
+  \item November 9th to November 16th - Implementation of the basics of lenses
+  \item November 16th to November 23th - Implementation of the more advanced features of lenses
+  \item November 23th to November 30th
+    \begin{itemize}
+      \item Debugging and creating the interactive GUI for playing with the simulation
+      \item Project Presentation Video Making
+    \end{itemize}
+  \item December 1st - Project Submission
+  \item December 1st to 8th - Write the Rendering topics essay
+\end{itemize}
 \end{document}
 
