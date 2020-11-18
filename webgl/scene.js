@@ -28,6 +28,7 @@ function makeScene() {
     });
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
+    objects.push(cube);
 
     camera.position.z = 5;
 

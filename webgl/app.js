@@ -6,23 +6,31 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // SETUP OrbitControls
-controls = new THREE.OrbitControls(camera, renderer.domElement);
+orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
 //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-controls.dampingFactor = 0.15;
-controls.screenSpacePanning = false;
-controls.minDistance = 5;
-controls.maxDistance = 500;
-controls.maxPolarAngle = Math.PI / 2;
+orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+orbitControls.dampingFactor = 0.15;
+orbitControls.screenSpacePanning = false;
+orbitControls.minDistance = 5;
+orbitControls.maxDistance = 500;
+orbitControls.maxPolarAngle = Math.PI / 2;
+
+var objects = [];
+
+makeScene();
+const dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
+dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
+dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
+
+
 
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+    orbitControls.update();
     // renderer.clear(true, true, true);
     renderer.render(scene, camera);
 }
 
 makeGui();
-makeScene();
 
 animate();
