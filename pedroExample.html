@@ -1,0 +1,603 @@
+<html>
+<style>
+    body {
+        font-family: Monospace;
+        background-color: #fff;
+        color: #000;
+        margin: 0px;
+        overflow: hidden;
+    }
+
+    #splash {
+        margin: 0px;
+        border: 3px solid #fff;
+        width: 870px;
+        height: 90%;
+        position: absolute;
+        margin-top: 50px;
+        top: 0px;
+        /* to center: 
+		left: 50%;
+		margin-left: -435px; 
+		*/
+        left: 50px;
+        z-index: 4;
+        font-size: 20px;
+        color: white;
+        display: none;
+        background-color: #000;
+        opacity: 0.8;
+        filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr='#CC000000', EndColorStr='#CC000000');
+    }
+
+    .codearea {
+        margin: 10px;
+        width: 850px;
+        height: 40%;
+        color: white;
+        background-color: #000;
+        font-size: 14px;
+    }
+</style>
+
+<body>
+    <!--SHADERS-->
+    <script id="phongG-vs-glsl" type="x-shader/x-vertex" src="shaders/phongG-vs-glsl.vert"></script>
+
+    <script id="phongG-ps-glsl" type="x-shader/x-fragment" src="shaders/phongG-ps-glsl.frag"></script>
+
+    <script id="phongP-vs-glsl" type="x-shader/x-vertex">
+	varying vec3 vNormal;
+	varying vec3 vPos;
+	void main(){
+		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+		vPos = (modelViewMatrix * vec4(position, 1.0)).xyz;
+		vNormal = normalMatrix * normal;
+		gl_Position.z += 0.0001; //for wireframe z-fighting
+	}
+</script>
+
+    <script id="phongP-ps-glsl" type="x-shader/x-fragment">
+	varying vec3 vNormal;
+	varying vec3 vPos;
+	#if NUM_POINT_LIGHTS > 0
+		struct PointLight {
+		  vec3 position;
+		  vec3 color;
+		};
+		uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
+	#endif	
+	uniform vec3 ambientLightColor;
+	uniform vec3 mDiffuse;
+	uniform vec3 mAmbient;
+	uniform vec3 mSpecular;
+	uniform float mShininess;
+	uniform float mKa;
+	uniform float mKd;
+	uniform float mKs;
+	void main() {	
+		vec3 N = normalize(vNormal);
+		vec3 V = normalize(-vPos);
+		vec3 lDif = vec3(0.0, 0.0, 0.0);
+		float lSpec = 0.0;
+		for(int l = 0; l < NUM_POINT_LIGHTS; l++) {
+			vec3 L = normalize(pointLights[l].position - vPos);
+			float lamb = clamp(dot(L, N), 0.0, 1.0);
+			lDif += lamb * pointLights[l].color;
+			if(lamb > 0.0) {
+				vec3 R = reflect(-L, N);
+				float specAngle = max(dot(R, V), 0.0);
+				lSpec += pow(specAngle, mShininess);
+			}
+		}
+		gl_FragColor = vec4(mKa * ambientLightColor * mAmbient +
+							mKd * lDif * mDiffuse +
+							mKs * lSpec * mSpecular, 1.0);
+	}
+</script>
+
+    <script id="toon-vs-glsl" type="x-shader/x-vertex">
+	varying vec3 vNormal;
+	varying vec3 vPos;
+	void main(){
+		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+		vPos = (modelViewMatrix * vec4(position, 1.0)).xyz;
+		vNormal = normalMatrix * normal;
+		gl_Position.z += 0.0001; //for wireframe z-fighting
+	}
+</script>
+
+    <script id="toon-ps-glsl" type="x-shader/x-fragment">
+	varying vec3 vNormal;
+	varying vec3 vPos;
+	#if NUM_POINT_LIGHTS > 0
+		struct PointLight {
+		  vec3 position;
+		  vec3 color;
+		};
+		uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
+	#endif	
+	uniform vec3 ambientLightColor;
+	uniform vec3 mDiffuse;
+	uniform vec3 mAmbient;
+	uniform vec3 mSpecular;
+	uniform float mShininess;
+	uniform float mKa;
+	uniform float mKd;
+	uniform float mKs;
+	
+	const float levels = 20.0;
+	const float scaleFactor = 1.0 / levels;
+
+	void main() {	
+		vec3 N = normalize(vNormal);
+		vec3 V = normalize(-vPos);
+		vec3 lDif = vec3(0.0, 0.0, 0.0);
+		float lSpec = 0.0;
+		for(int l = 0; l < NUM_POINT_LIGHTS; l++) {
+			vec3 L = normalize(pointLights[l].position - vPos);
+			vec3 H = normalize(L + V);
+			float lamb = clamp(dot(L, N), 0.0, 1.0);
+			lDif += lamb * pointLights[l].color;
+			if(lamb > 0.0) {
+				vec3 R = reflect(-L, N);
+				float specAngle = max(dot(R, V), 0.0);
+				lSpec += pow(specAngle, mShininess);
+			}
+		}
+		float rimIntensity = (1.0 - dot(V, N));
+		//rimIntensity = smoothstep(0.8 - 0.01, 0.8 + 0.01, rimIntensity);
+		vec3 outColor = mKa * ambientLightColor * mAmbient +
+							mKd * smoothstep(0.0, 0.01, lDif) * mDiffuse +
+							mKs * smoothstep(0.15, 0.3, lSpec) * mSpecular +
+							rimIntensity * lDif;
+		gl_FragColor = vec4(outColor, 1.0);
+	}
+</script>
+
+    <script id="depth-vs-glsl" type="x-shader/x-vertex">
+	varying float vDepth;
+	void main(){
+		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+		float vDepth = (modelViewMatrix * vec4(position, 1.0)).z;
+		gl_Position.z += 0.0001; //for wireframe z-fighting
+	}
+</script>
+
+    <script id="depth-ps-glsl" type="x-shader/x-fragment">
+	varying float vDepth;
+	void main() {	
+		float z = gl_FragCoord.z/gl_FragCoord.w/999.9; //assumes far plane at 1000, near plane at 0.1
+		gl_FragColor = vec4(z, z, z, 1.0);
+	}
+</script>
+
+    <script src="webgl/three.js"></script>
+    <script src='webgl/OrbitControls.js'></script>
+    <script src='webgl/dat.gui.js'></script>
+    <script>
+
+        /****** PARAMETERS AND GUI ******/
+
+        var sceneWidth;
+        var sceneHeight;
+        var sceneRatio;
+        var renderer;
+        var scene;
+        var camera;
+        var controls;
+
+        var ball;
+        var knot;
+        var cone;
+        var ballwires;
+        var knotwires;
+        var conewires;
+        var ballfnhelper;
+        var knotfnhelper;
+        var conefnhelper;
+        var ballvnhelper;
+        var knotvnhelper;
+        var conevnhelper;
+
+        var table;
+        var leg;
+        var ground;
+
+        var pointLight;
+
+        var gui;
+
+        var cfg =
+        {
+            shaderRoot: 'phongP',
+            flatNormals: true,
+            wireframe: false,
+            animate: false,
+            fnvis: false,
+            vnvis: false,
+            shadervis: false,
+            lightPosX: -20.0,
+            lightPosY: 30.0,
+            lightPosZ: -50.0,
+            about: function () { }
+        };
+
+        initialize();
+
+        // fix vertexnormalhelper being shifted; no idea why it shifts if created or updated after we set the ball position
+        // create the metacamera and start working on the features (backface culling can be first, clipping next using the clipplanes provided by 3js? How about triangle level clipping?
+        // have a vector visualization mode; for a predefined vertex in the sphere, draw N, L, V, R, maybe also H if we do Blinn-Phong (these only appear when toggled and on metacam)
+        // light settings: Enable/Disable ambient, diffuse, specular
+        // fix depth shader, right now hardcoded near and far planes (maybe do this when we do multiple camera settings)
+        // add a light color setting; add a second light? Can enable/disable it?
+        // use a model object to load the models instead of separate variables
+
+        // add tessellation option? Is it needed?
+
+        /****** INITIAL APP SETUP ******/
+
+        function makePhongControls(obj, objstr) {
+            var gObj = gui.addFolder(objstr);
+            gObj.add(obj.material.uniforms.mKa, 'value').min(0.0).max(2.0).step(0.01).name('Ka').listen();
+            gObj.add(obj.material.uniforms.mKd, 'value').min(0.0).max(2.0).step(0.01).name('Kd').listen();
+            gObj.add(obj.material.uniforms.mKs, 'value').min(0.0).max(2.0).step(0.01).name('Ks').listen();
+            var dummy = {}; //needed due to incompatibility between dat.gui and 3js colors
+            dummy['mAmbient'] = obj.material.uniforms.mAmbient.value.getStyle();
+            gObj.addColor(dummy, 'mAmbient').name('ambient').listen().onChange(function (value) {
+                obj.material.uniforms.mAmbient.value = new THREE.Color(value);
+                obj.material.uniforms.mAmbient.needsUpdate = true;
+            });
+            dummy['mDiffuse'] = obj.material.uniforms.mDiffuse.value.getStyle();
+            gObj.addColor(dummy, 'mDiffuse').name('diffuse').listen().onChange(function (value) {
+                obj.material.uniforms.mDiffuse.value = new THREE.Color(value);
+                obj.material.uniforms.mDiffuse.needsUpdate = true;
+            });
+            dummy['mSpecular'] = obj.material.uniforms.mSpecular.value.getStyle();
+            gObj.addColor(dummy, 'mSpecular').name('specular').listen().onChange(function (value) {
+                obj.material.uniforms.mSpecular.value = new THREE.Color(value);
+                obj.material.uniforms.mSpecular.needsUpdate = true;
+            });
+            gObj.add(obj.material.uniforms.mShininess, 'value').min(3).max(100).step(1).name('shininess').listen();
+            gObj.close();
+            return gObj;
+        }
+
+        function refreshShaders(obj) {
+            obj.material = new THREE.ShaderMaterial({
+                uniforms: obj.material.uniforms,
+                lights: true,
+                vertexShader: document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent,
+                fragmentShader: document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent
+            });
+            obj.material.needsUpdate = true;
+        }
+
+        function refreshNormals(obj) {
+            if (cfg.flatNormals)
+                obj.geometry.computeFlatVertexNormals();
+            else
+                obj.geometry.computeVertexNormals();
+        }
+
+        function updateLight() {
+            pointLight.position.set(cfg.lightPosX, cfg.lightPosY, cfg.lightPosZ);
+        }
+
+        function makeGui() {
+            gui = new dat.GUI();
+
+            gui.add(cfg, 'about').name('Help & About');
+
+            gBall = makePhongControls(ball, 'ball');
+            gKnot = makePhongControls(knot, 'knot');
+            gCone = makePhongControls(cone, 'cone');
+
+            //light
+            var gLight = gui.addFolder('point light');
+            gLight.add(cfg, 'lightPosX').min(-60.0).max(60.0).step(1.0).name('lightX').listen().onChange(function (value) { updateLight(); });
+            gLight.add(cfg, 'lightPosY').min(-60.0).max(60.0).step(1.0).name('lightY').listen().onChange(function (value) { updateLight(); });
+            gLight.add(cfg, 'lightPosZ').min(-60.0).max(60.0).step(1.0).name('lightZ').listen().onChange(function (value) { updateLight(); });
+
+            gui.add(cfg, 'shaderRoot', { gouraud: 'phongG', phong: 'phongP', toon: 'toon', depth: 'depth' }).name('shading mode').listen().onChange(function (value) {
+                refreshShaders(ball);
+                refreshShaders(cone);
+                refreshShaders(knot);
+                if (cfg.shadervis) {
+                    document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
+                    document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
+                }
+            });
+
+            gui.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
+                refreshNormals(ball);
+                refreshNormals(cone);
+                refreshNormals(knot);
+                ballvnhelper.update();
+                conevnhelper.update();
+                knotvnhelper.update();
+            });
+
+            gui.add(cfg, 'animate').name('animate (a)').listen();
+
+            gui.add(cfg, 'wireframe').name('wireframe (w)').listen().onChange(function (value) { updateWireframe(value); });
+
+            gui.add(cfg, 'fnvis').name('view fNormals').listen().onChange(function (value) {
+                ballfnhelper.visible = value;
+                conefnhelper.visible = value;
+                knotfnhelper.visible = value;
+            });
+
+            gui.add(cfg, 'vnvis').name('view vNormals').listen().onChange(function (value) {
+                ballvnhelper.visible = value;
+                conevnhelper.visible = value;
+                knotvnhelper.visible = value;
+            });
+
+            gui.add(cfg, 'shadervis').name('view shaders').listen().onChange(function (value) {
+                var e = document.getElementById('splash');
+                if (value == false)
+                    e.style.display = 'none';
+                else {
+                    document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
+                    document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
+                    e.style.display = 'block';
+                }
+            });
+
+            gui.close();
+        }
+
+        document.addEventListener("keydown", onDocumentKeyDown, false);
+        function onDocumentKeyDown(event) {
+            var keyCode = event.which;
+            if (keyCode == 87) {
+                cfg.wireframe = !cfg.wireframe;
+                updateWireframe(cfg.wireframe);
+            } else if (keyCode == 65) {
+                cfg.animate = !cfg.animate;
+            }
+        };
+
+        function updateWireframe(value) {
+            ballwires.visible = value;
+            conewires.visible = value;
+            knotwires.visible = value;
+        }
+
+        function initControls() {
+            // controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+            controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+            controls.dampingFactor = 0.15;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 50;
+            controls.maxDistance = 500;
+            controls.maxPolarAngle = Math.PI / 2;
+        }
+
+        function initialize() {
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setClearColor(0x000000, 1); //0x88aaff
+
+            var container = document.createElement('div');
+            document.body.appendChild(container);
+            container.appendChild(renderer.domElement);
+            //document.body.appendChild( renderer.domElement );
+
+            makeScene();
+            setCamera();
+            initControls();
+            makeGui();
+            render();
+        }
+
+        function setCamera() {
+            sceneWidth = window.innerWidth;
+            sceneHeight = window.innerHeight;
+            sceneRatio = sceneWidth / sceneHeight;
+            renderer.setSize(sceneWidth, sceneHeight);
+            camera = new THREE.PerspectiveCamera(30, sceneRatio, 0.1, 1000.0);
+            camera.position.set(0, 50, -120); //top view
+            camera.lookAt(new THREE.Vector3(0, 40, 0));
+        }
+
+        window.onresize = function (event) {
+            setCamera();
+            initControls();
+        };
+
+        function makeScene() {
+            scene = new THREE.Scene();
+
+            //add fog
+            var ua = navigator.userAgent.toLowerCase();
+            var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+            if (!isAndroid) //known bug
+                scene.fog = new THREE.Fog(0x000000, 500, 1000);
+
+            var ambientLight = new THREE.AmbientLight(0x999999);
+            scene.add(ambientLight);
+
+            pointLight = new THREE.PointLight(0xffffff);
+            pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
+            pointLight.position.set(cfg.lightPosX, cfg.lightPosY, cfg.lightPosZ);
+            scene.add(pointLight);
+
+            //This is not really being used in the demo, so can use phong material and just avoid view dependent stuff, such as specular
+            var groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png"); //grasslight-big.jpg
+            groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+            //groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+            groundTexture.repeat.set(50, 50);
+            groundTexture.anisotropy = 32;
+            var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
+            ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
+            ground.rotation.x = - Math.PI / 2;
+            ground.position.y = -22;
+            scene.add(ground);
+
+            var brassTexture = THREE.ImageUtils.loadTexture("tex/brass.jpg");
+            brassTexture.wrapS = brassTexture.wrapT = THREE.RepeatWrapping;
+            brassTexture.repeat.set(1, 1);
+            brassTexture.anisotropy = 32;
+            var brassMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: brassTexture });
+            var woodTexture = THREE.ImageUtils.loadTexture("tex/wood.jpg");
+            woodTexture.wrapS = woodTexture.wrapT = THREE.RepeatWrapping;
+            woodTexture.repeat.set(1, 1);
+            woodTexture.anisotropy = 32;
+            var woodMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: woodTexture });
+            leg = new THREE.Mesh(new THREE.CylinderGeometry(7, 3, 20, 20), brassMaterial);
+            leg.position.y = -12;
+            scene.add(leg);
+            leg = new THREE.Mesh(new THREE.CylinderGeometry(3, 9, 10, 20), brassMaterial);
+            leg.position.y = -17;
+            scene.add(leg);
+            table = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 2, 40), woodMaterial);
+            table.position.y = -1;
+            scene.add(table);
+
+            var wireframeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+
+            var geometry = new THREE.SphereGeometry(7, 20, 20);
+            geometry.computeFlatVertexNormals();
+            ball = new THREE.Mesh(geometry, new THREE.ShaderMaterial({
+                uniforms: THREE.UniformsUtils.merge([
+                    THREE.UniformsLib["lights"],
+                    {
+                        mAmbient: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, // should generally match color
+                        mDiffuse: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, 
+                        mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                        mShininess: { type: "f", value: 40.0 },
+                        mKa: { type: "f", value: 0.3 },
+                        mKd: { type: "f", value: 0.8 },
+                        mKs: { type: "f", value: 0.8 }
+                    }
+                ]),
+                lights: true,
+                vertexShader: document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent,
+                fragmentShader: document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent
+            }));
+
+            ballfnhelper = new THREE.FaceNormalsHelper(ball, 1, 0xff0000, 1);
+            ballfnhelper.visible = cfg.fnvis;
+            ball.add(ballfnhelper);
+            ballvnhelper = new THREE.VertexNormalsHelper(ball, 1, 0x00ff00, 1);
+            ballvnhelper.visible = cfg.vnvis;
+            ball.add(ballvnhelper);
+            ball.position.x = -7;
+            ball.position.y = 7;
+            ball.position.z = -7;
+            scene.add(ball);
+            var wireframeGeometry = new THREE.WireframeGeometry(geometry);
+            ballwires = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+            ball.add(ballwires);
+            ballwires.visible = cfg.wireframe;
+
+            //var geometry = new THREE.CylinderGeometry(6, 6, 14, 20);
+            var geometry = new THREE.TorusKnotGeometry(4, 1.5, 100, 16);
+            geometry.computeFlatVertexNormals();
+            knot = new THREE.Mesh(geometry, new THREE.ShaderMaterial({
+                uniforms: THREE.UniformsUtils.merge([
+                    THREE.UniformsLib["lights"],
+                    {
+                        mAmbient: { type: "c", value: new THREE.Color(0xff0000) }, //0x00dd00, // should generally match color
+                        mDiffuse: { type: "c", value: new THREE.Color(0xff0000) }, //0x00dd00, 
+                        mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                        mShininess: { type: "f", value: 40.0 },
+                        mKa: { type: "f", value: 0.3 },
+                        mKd: { type: "f", value: 0.8 },
+                        mKs: { type: "f", value: 0.8 }
+                    }
+                ]),
+                lights: true,
+                vertexShader: document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent,
+                fragmentShader: document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent
+            }));
+            knotfnhelper = new THREE.FaceNormalsHelper(knot, 1, 0xff0000, 1);
+            knotfnhelper.visible = cfg.fnvis;
+            knot.add(knotfnhelper);
+            knotvnhelper = new THREE.VertexNormalsHelper(knot, 1, 0xffff00, 1);
+            knotvnhelper.visible = cfg.vnvis;
+            knot.add(knotvnhelper);
+            knot.position.x = 7;
+            knot.position.y = 7;
+            knot.position.z = -7;
+            scene.add(knot);
+            var wireframeGeometry = new THREE.WireframeGeometry(geometry);
+            knotwires = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+            knot.add(knotwires);
+            knotwires.visible = cfg.wireframe;
+
+            var geometry = new THREE.CylinderGeometry(0, 7, 24, 24);
+            geometry.computeFlatVertexNormals();
+            cone = new THREE.Mesh(geometry, new THREE.ShaderMaterial({
+                uniforms: THREE.UniformsUtils.merge([
+                    THREE.UniformsLib["lights"],
+                    {
+                        mAmbient: { type: "c", value: new THREE.Color(0x00ff00) }, //0x00dd00, // should generally match color
+                        mDiffuse: { type: "c", value: new THREE.Color(0x00ff00) }, //0x00dd00, 
+                        mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                        mShininess: { type: "f", value: 40.0 },
+                        mKa: { type: "f", value: 0.3 },
+                        mKd: { type: "f", value: 0.8 },
+                        mKs: { type: "f", value: 0.8 }
+                    }
+                ]),
+                lights: true,
+                vertexShader: document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent,
+                fragmentShader: document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent
+            }));
+            conefnhelper = new THREE.FaceNormalsHelper(cone, 1, 0xff0000, 1);
+            conefnhelper.visible = cfg.fnvis;
+            cone.add(conefnhelper);
+            conevnhelper = new THREE.VertexNormalsHelper(cone, 1, 0xffff00, 1);
+            conevnhelper.visible = cfg.vnvis;
+            cone.add(conevnhelper);
+            cone.position.y = 12;
+            cone.position.z = 8;
+            scene.add(cone);
+            var wireframeGeometry = new THREE.WireframeGeometry(geometry);
+            conewires = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+            cone.add(conewires);
+            conewires.visible = cfg.wireframe;
+        }
+
+        function render() {
+            requestAnimationFrame(render);
+            controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+            if (cfg.animate) {
+                ball.rotation.y += 0.01;
+                cone.rotation.y += 0.01;
+                knot.rotation.y += 0.01;
+            }
+            renderer.clear(true, true, true);
+            renderer.render(scene, camera);
+        };
+
+        function toggleVisibility(id) {
+            var e = document.getElementById(id);
+            if (e.style.display == 'block')
+                e.style.display = 'none';
+            else {
+                document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
+                document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
+                e.style.display = 'block';
+            }
+        }
+
+    </script>
+
+    <div id="splash">
+        <!-- onclick="toggleVisibility('splash');"-->
+        <p />
+        <center>Vertex shader</center>
+        <textarea class="codearea" id="vstext"></textarea>
+        <p />
+        <center>Pixel shader</center>
+        <textarea class="codearea" id="pstext"></textarea>
+        <p />
+    </div>
+</body>
+
+</html>
