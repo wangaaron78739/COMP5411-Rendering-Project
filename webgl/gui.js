@@ -1,6 +1,6 @@
 var cfg =
 {
-    shaderRoot: 'phongP',
+    shaderRoot: 'gouraud',
     flatNormals: true,
     wireframe: false,
     animate: false,
@@ -54,7 +54,7 @@ function makeGui() {
     gLight.add(cfg, 'lightPosY').min(-60.0).max(60.0).step(1.0).name('lightY').listen().onChange(function (value) { updateLight(); });
     gLight.add(cfg, 'lightPosZ').min(-60.0).max(60.0).step(1.0).name('lightZ').listen().onChange(function (value) { updateLight(); });
 
-    gui.add(cfg, 'shaderRoot', { gouraud: 'phongG', phong: 'phongP', toon: 'toon', depth: 'depth' }).name('shading mode').listen().onChange(function (value) {
+    gui.add(cfg, 'shaderRoot', { gouraud: 'gourand', phong: 'phong', toon: 'toon', depth: 'depth' }).name('shading mode').listen().onChange(function (value) {
         refreshShaders(ball);
         refreshShaders(cone);
         refreshShaders(knot);
