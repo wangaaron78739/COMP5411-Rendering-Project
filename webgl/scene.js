@@ -1,13 +1,17 @@
-var getSourceSynch = function (url) {
+function getSourceSynch(url) {
     var req = new XMLHttpRequest();
     req.open("GET", url, false);
     req.send(null);
     return (req.status == 200) ? req.responseText : null;
 };
+function getShader(ty) {
+    return getSourceSynch(document.getElementById(`${cfg.shaderRoot}-${ty}-glsl`).src);
+}
 
 function makeScene() {
     const geometry = new THREE.BoxGeometry();
     geometry.computeFlatVertexNormals();
+    
     const material = new THREE.ShaderMaterial({
         uniforms: THREE.UniformsUtils.merge([
             THREE.UniformsLib["lights"],
@@ -22,8 +26,8 @@ function makeScene() {
             }
         ]),
         lights: true,
-        vertexShader: getSourceSynch(document.getElementById(cfg.shaderRoot + '-vs-glsl').src),
-        fragmentShader: getSourceSynch(document.getElementById(cfg.shaderRoot + '-ps-glsl').src)
+        vertexShader: getShader('vs'),
+        fragmentShader: getShader('ps'),
 
     });
     const cube = new THREE.Mesh(geometry, material);
