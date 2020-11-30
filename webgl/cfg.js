@@ -33,15 +33,15 @@ let defaultCfg =
 
     lensesOptions: [
         {
-            lensPosX: 0.0,
-            lensPosY: 0.0,
+            lensPosX: 5.0,
+            lensPosY: 5.0,
             focalLength: 1.0,
             diameter: 4.0,
             distance: 5.0,
         },
         {
-            lensPosX: 1.0,
-            lensPosY: -1.0,
+            lensPosX: 0.0,
+            lensPosY: -0.0,
             focalLength: 1.0,
             diameter: 1.0,
             distance: 10.0,
@@ -101,9 +101,8 @@ cfg.lightPos.forEach(pos => {
     world.lights.push(pointLight);
 });
 
-const groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png"); //grasslight-big.jpg
+const groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png");
 groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-//groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 groundTexture.repeat.set(50, 50);
 groundTexture.anisotropy = 32;
 const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
@@ -113,8 +112,6 @@ ground.position.y = -22;
 
 world.environment.push(ground);
 
-
-//Lenses
 cfg.lensesOptions.forEach(config => {
     const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
     lens.position.x = config.lensPosX;

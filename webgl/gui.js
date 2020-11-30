@@ -1,10 +1,3 @@
-
-// focal length
-// diameter
-// reset
-// wireframe, vertex normal
-// 
-
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(event) {
     var keyCode = event.which;
@@ -23,7 +16,6 @@ function updateWireframe(value) {
 }
 
 function initControls() {
-    // controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -69,12 +61,8 @@ function updateMagnify(gui, lens, value, lensId, maxId) {
     lens.scale.set(cfg.lensesOptions[lensId].diameter, cfg.lensesOptions[lensId].diameter);
     lens.position.z = -cfg.lensesOptions[lensId].distance;
 
-    if (lensId > 0) {
-        gui.__folders[`Lens ${lensId - 1}`].__controllers[2].__max = value - 1;
-    }
-    if (lensId < maxId) {
-        gui.__folders[`Lens ${lensId + 1}`].__controllers[2].__min = value + 1;
-    }
+    if (lensId > 0) { gui.__folders[`Lens ${lensId - 1}`].__controllers[2].__max = value - 1; }
+    if (lensId < maxId) { gui.__folders[`Lens ${lensId + 1}`].__controllers[2].__min = value + 1; }
 }
 
 function makeLensControls(gui, lens, lensId, maxId) {
@@ -87,7 +75,6 @@ function makeLensControls(gui, lens, lensId, maxId) {
     let maxD = 60.0;
     if (lensId > 0) minD = cfg.lensesOptions[lensId - 1].distance;
     if (lensId < maxId) maxD = cfg.lensesOptions[lensId + 1].distance;
-    console.log(lensId, maxId, minD, maxD);
     gLens.add(cfg.lensesOptions[lensId], 'distance').min(minD).max(maxD).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
 }
 
@@ -139,20 +126,11 @@ function makeGui(world) {
     var gMesh = gui.addFolder('Mesh Options');
     gMesh.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
         world.objects.forEach(element => { refreshNormal(element); });
-        // ballvnhelper.update();
-        // conevnhelper.update();
-        // knotvnhelper.update();
     });
     gMesh.add(cfg, 'wireframe').name('wireframe (w)').listen().onChange(function (value) { updateWireframe(value); });
     gMesh.add(cfg, 'fnVis').name('view fNormals').listen().onChange(function (value) {
-        // ballfnhelper.visible = value;
-        // conefnhelper.visible = value;
-        // knotfnhelper.visible = value;
     });
     gMesh.add(cfg, 'vnVis').name('view vNormals').listen().onChange(function (value) {
-        // ballvnhelper.visible = value;
-        // conevnhelper.visible = value;
-        // knotvnhelper.visible = value;
     });
 
     var gShaders = gui.addFolder('Shading Options');

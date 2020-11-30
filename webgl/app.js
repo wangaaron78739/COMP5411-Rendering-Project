@@ -16,8 +16,6 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
 makeBaseScene(cfg, camera, scene, world);
 
-const NUM_LENS = 2;
-
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
 const cameraPerspective = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
@@ -45,7 +43,6 @@ world.lenses.forEach(
             const plane = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
             const quad = new THREE.Mesh(plane, materialScreen);
             quad.position.z = -100;
-            // quad.position.z = - 100;
 
             scene.add(quad);
         })(sceneScreen);
@@ -82,8 +79,6 @@ function animate() {
     stats.begin();
     requestAnimationFrame(animate);
     orbitControls.update();
-
-
 
     renderTo(sceneTexture, function (renderer) {
         renderer.setClearColor(0xff0000, 0);
