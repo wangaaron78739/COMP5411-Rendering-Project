@@ -11,6 +11,7 @@ Lens Parameters:
 
 ## Lens Simulation Procedure
 
+**First**
 Sort the lenses so that any `X` is rendered after all the lenses that `X` can be see
 
 **For each lens**

@@ -32,10 +32,12 @@ function initControls() {
     controls.minDistance = 50;
     controls.maxDistance = 500;
     controls.maxPolarAngle = Math.PI / 2;
+
+    return controls;
 }
 
 
-function makePhongControls(obj, objstr) {
+function makePhongControls(gui, obj, objstr) {
     var gObj = gui.addFolder(objstr);
     gObj.add(obj.material.uniforms.mKa, 'value').min(0.0).max(2.0).step(0.01).name('Ka').listen();
     gObj.add(obj.material.uniforms.mKd, 'value').min(0.0).max(2.0).step(0.01).name('Kd').listen();
@@ -61,6 +63,25 @@ function makePhongControls(obj, objstr) {
     return gObj;
 }
 
+function makeLensControls(gui, lens, lensId) {
+    var gLens = gui.addFolder(`Lens ${lensId}`);
+    gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(); });
+    gLens.add(cfg.lensesOptions[lensId], 'diameter').min(-60.0).max(60.0).step(1.0).name('Diameter').listen().onChange(function (value) { updateMagnify(); });
+}
+
+function makeLightControls(gui, light, lightId) {
+    var gLight = gui.addFolder(`Light ${lightId}`);
+    gLight.add(cfg.lightPos[lightId], 'lightPosX').min(-60.0).max(60.0).step(1.0).name('X Coordinate').listen().onChange(function (value) {
+        light.position.set(cfg.lightPos[lightId].lightPosX, cfg.lightPos[lightId].lightPosY, cfg.lightPos[lightId].lightPosZ);
+    });
+    gLight.add(cfg.lightPos[lightId], 'lightPosY').min(-60.0).max(60.0).step(1.0).name('Y Coordinate').listen().onChange(function (value) {
+        light.position.set(cfg.lightPos[lightId].lightPosX, cfg.lightPos[lightId].lightPosY, cfg.lightPos[lightId].lightPosZ);
+    });
+    gLight.add(cfg.lightPos[lightId], 'lightPosZ').min(-60.0).max(60.0).step(1.0).name('Z Coordinate').listen().onChange(function (value) {
+        light.position.set(cfg.lightPos[lightId].lightPosX, cfg.lightPos[lightId].lightPosY, cfg.lightPos[lightId].lightPosZ);
+    });
+}
+
 function refreshShaders(obj) {
     obj.material = new THREE.ShaderMaterial({
         uniforms: obj.material.uniforms,
@@ -78,40 +99,27 @@ function refreshNormals(obj) {
         obj.geometry.computeVertexNormals();
 }
 
-function updateLight() {
-    pointLight.position.set(cfg.lightPosX, cfg.lightPosY, cfg.lightPosZ);
-}
-
 function updateMagnify() {
     //TODO:
 }
 
-function makeGui(objects, lenses) {
+function makeGui(world) {
     gui = new dat.GUI();
 
     gui.add(cfg, 'about').name('Help & About');
 
-    //TODO:
-    // gBall = makePhongControls(ball, 'ball');
-    // gKnot = makePhongControls(knot, 'knot');
-    // gCone = makePhongControls(cone, 'cone');
+    var gObject = gui.addFolder('Objects');
+    world.objects.forEach(object => { makePhongControls(gObject, object, object.name); });
 
-    var gLight = gui.addFolder('Point Light');
-    gLight.add(cfg, 'lightPosX').min(-60.0).max(60.0).step(1.0).name('lightX').listen().onChange(function (value) { updateLight(); });
-    gLight.add(cfg, 'lightPosY').min(-60.0).max(60.0).step(1.0).name('lightY').listen().onChange(function (value) { updateLight(); });
-    gLight.add(cfg, 'lightPosZ').min(-60.0).max(60.0).step(1.0).name('lightZ').listen().onChange(function (value) { updateLight(); });
+    var gMagnify = gui.addFolder('Lens');
+    world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, lens, idx); });
 
-    var gMagnify = gui.addFolder('Magnifying Lens Options');
-    gMagnify.add(cfg, 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(); });
-    gMagnify.add(cfg, 'diameter').min(-60.0).max(60.0).step(1.0).name('Diameter').listen().onChange(function (value) { updateMagnify(); });
-
+    var gLight = gui.addFolder('Lights');
+    world.lights.forEach((light, idx) => { makeLightControls(gLight, light, idx); });
 
     var gMesh = gui.addFolder('Mesh Options');
     gMesh.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
-        objects.forEach(element => {
-            refreshNormal(element);
-
-        });
+        world.objects.forEach(element => { refreshNormal(element); });
         // ballvnhelper.update();
         // conevnhelper.update();
         // knotvnhelper.update();
@@ -130,7 +138,7 @@ function makeGui(objects, lenses) {
 
     var gShaders = gui.addFolder('Shading Options');
     gShaders.add(cfg, 'shaderRoot', { gouraud: 'gouraud', phong: 'phong' }).name('shading mode').listen().onChange(function (value) {
-        objects.forEach(element => {
+        world.objects.forEach(element => {
             refreshShaders(element);
         });
         if (cfg.shaderVis) {
