@@ -37,7 +37,7 @@ let defaultCfg =
             lensPosY: 0.0,
             focalLength: 1.0,
             diameter: 4.0,
-            distance: 1.0,
+            distance: 5.0,
         },
         {
             lensPosX: 1.0,

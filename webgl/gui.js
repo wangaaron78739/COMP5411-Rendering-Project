@@ -63,18 +63,32 @@ function makePhongControls(gui, obj, objstr) {
     return gObj;
 }
 
-function updateMagnify(lens, lensId) {
-    //TODO:
-    // lens.scale.set(1.1,1.1,1.1);
+function updateMagnify(gui, lens, value, lensId, maxId) {
+    //TODO: update texture
+
     lens.scale.set(cfg.lensesOptions[lensId].diameter, cfg.lensesOptions[lensId].diameter);
     lens.position.z = -cfg.lensesOptions[lensId].distance;
+
+    if (lensId > 0) {
+        gui.__folders[`Lens ${lensId - 1}`].__controllers[2].__max = value - 1;
+    }
+    if (lensId < maxId) {
+        gui.__folders[`Lens ${lensId + 1}`].__controllers[2].__min = value + 1;
+    }
 }
 
-function makeLensControls(gui, lens, lensId) {
+function makeLensControls(gui, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(lens, lensId); });
-    gLens.add(cfg.lensesOptions[lensId], 'diameter').min(1.0).max(5.0).step(0.05).name('Diameter').listen().onChange(function (value) { updateMagnify(lens, lensId); });
-    gLens.add(cfg.lensesOptions[lensId], 'distance').min(1.0).max(60.0).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(lens, lensId); });
+    gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) {
+        updateMagnify(gui, lens, value, lensId, maxId);
+    });
+    gLens.add(cfg.lensesOptions[lensId], 'diameter').min(1.0).max(5.0).step(0.05).name('Diameter').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
+    let minD = 1.0;
+    let maxD = 60.0;
+    if (lensId > 0) minD = cfg.lensesOptions[lensId - 1].distance;
+    if (lensId < maxId) maxD = cfg.lensesOptions[lensId + 1].distance;
+    console.log(lensId, maxId, minD, maxD);
+    gLens.add(cfg.lensesOptions[lensId], 'distance').min(minD).max(maxD).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
 }
 
 function makeLightControls(gui, light, lightId) {
@@ -117,7 +131,7 @@ function makeGui(world) {
     world.objects.forEach(object => { makePhongControls(gObject, object, object.name); });
 
     var gMagnify = gui.addFolder('Lens');
-    world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, lens, idx); });
+    world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, lens, idx, world.lenses.length - 1); });
 
     var gLight = gui.addFolder('Lights');
     world.lights.forEach((light, idx) => { makeLightControls(gLight, light, idx); });
