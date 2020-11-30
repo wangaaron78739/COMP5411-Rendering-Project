@@ -13,32 +13,50 @@ document.body.appendChild(renderer.domElement);
 // SETUP THREE scenes
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth*2, window.innerHeight*2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
 makeScene(cfg, camera, scene, world);
 
-const sceneScreen = new THREE.Scene();
-((scene) => {
-    const materialScreen = new THREE.ShaderMaterial({
-        uniforms: { tDiffuse: { value: sceneTexture.texture } },
-        vertexShader: getShaderCustom('screen', 'vs'),
-        fragmentShader: getShaderCustom('screen', 'ps'),
+const NUM_LENS = 2;
 
-        depthWrite: false
-    });
-
-    const plane = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
-    const quad = new THREE.Mesh(plane, materialScreen);
-    quad.position.z = -100;
-    // quad.position.z = - 100;
-
-    scene.add(quad);
-})(sceneScreen);
-
-const sceneTotal = new THREE.Scene();
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
 const cameraPerspective = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
+cameraOrtho.position.z = 0;
 cameraPerspective.position.z = 5;
+
+
+let lensScenes = [];
+let prevTexture = sceneTexture;
+for (let i = 0; i < NUM_LENS; i++) {
+    const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+
+    const sceneScreen = new THREE.Scene();
+    ((scene) => {
+        const materialScreen = new THREE.ShaderMaterial({
+            uniforms: { tDiffuse: { value: prevTexture.texture } },
+            vertexShader: getShaderCustom('screen', 'vs'),
+            fragmentShader: getShaderCustom('screen', 'ps'),
+
+            depthWrite: false
+        });
+
+        const plane = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
+        const quad = new THREE.Mesh(plane, materialScreen);
+        quad.position.z = -100;
+        // quad.position.z = - 100;
+
+        scene.add(quad);
+    })(sceneScreen);
+
+    const sceneTotal = new THREE.Scene();
+    // Add lenses (textured semispheres) to sceneTotal
+
+    const lens = { screen: sceneScreen, total: sceneTotal, tex: nextTexture };
+    lensScenes.push(lens);
+    prevTexture = nextTexture;
+}
+lensScenes[NUM_LENS - 1].tex = null;
+
 
 
 // SETUP OrbitControls & DragControls
@@ -61,15 +79,24 @@ function animate() {
     requestAnimationFrame(animate);
     orbitControls.update();
 
+
+
     renderTo(sceneTexture, function (renderer) {
         renderer.setClearColor(0xff0000, 0);
         renderer.render(scene, camera);
     });
-    renderTo(null, function (renderer) {
-        renderer.render(sceneScreen, cameraOrtho);
-        // renderer.render(sceneScreen, cameraPerspective);
-        renderer.render(sceneTotal, cameraPerspective);
-    });
+
+    for (const lens of lensScenes) {
+        renderTo(lens.tex, function (renderer) {
+            renderer.render(lens.screen, cameraOrtho);
+            renderer.render(lens.total, cameraPerspective);
+        })
+    }
+
+    // renderTo(null, function (renderer) {
+    //     renderer.render(sceneScreen, cameraOrtho);
+    //     renderer.render(sceneTotal, cameraPerspective);
+    // });
 
     stats.end();
 }
