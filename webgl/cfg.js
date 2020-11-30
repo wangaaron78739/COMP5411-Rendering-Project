@@ -34,8 +34,11 @@ function getSourceSynch(url) {
     return (req.status == 200) ? req.responseText : null;
 };
 
+function getShaderCustom(name, ty) {
+    return getSourceSynch(document.getElementById(`${name}-${ty}-glsl`).src);
+}
 function getShader(cfg, ty) {
-    return getSourceSynch(document.getElementById(`${cfg.shaderRoot}-${ty}-glsl`).src);
+    return getShaderCustom(cfg.shaderRoot, ty);
 }
 
 const cube = new THREE.Mesh(new THREE.BoxGeometry(),
