@@ -13,8 +13,8 @@ document.body.appendChild(renderer.domElement);
 // SETUP THREE scenes
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth*2, window.innerHeight*2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
-makeScene(cfg, camera, scene, world);
+const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+makeBaseScene(cfg, camera, scene, world);
 
 const sceneScreen = new THREE.Scene();
 ((scene) => {
@@ -37,15 +37,19 @@ const sceneScreen = new THREE.Scene();
 const sceneTotal = new THREE.Scene();
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
 const cameraPerspective = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 5;
+camera.position.z = 0;
 cameraPerspective.position.z = 5;
 
 
+makeLensScene(cfg, camera, sceneTotal, world);
+
 // SETUP OrbitControls & DragControls
 const orbitControls = initControls();
-const dragControls = new THREE.DragControls(world.objects, camera, renderer.domElement);
+const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
 dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
 dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
+
+
 
 function renderTo(target, fn) {
     renderer.setRenderTarget(target);

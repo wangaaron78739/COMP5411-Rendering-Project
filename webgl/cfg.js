@@ -33,8 +33,18 @@ let defaultCfg =
 
     lensesOptions: [
         {
+            lensPosX: 0.0,
+            lensPosY: 0.0,
             focalLength: 1.0,
-            diameter: 2.0,
+            diameter: 4.0,
+            distance: -5.0,
+        },
+        {
+            lensPosX: 1.0,
+            lensPosY: -1.0,
+            focalLength: 1.0,
+            diameter: 4.0,
+            distance: -10.0,
         }
     ],
 
@@ -79,26 +89,36 @@ const cube = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
 
 cube.name = 'cube';
 cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
-
 world.objects.push(cube);
+
 world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
 
-cfg.lightPos.forEach((pos => {
-    var pointLight = new THREE.PointLight(0xffffff);
+cfg.lightPos.forEach(pos => {
+    const pointLight = new THREE.PointLight(0xffffff);
     pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
     pointLight.position.set(pos.lightPosX, pos.lightPosY, pos.lightPosZ);
     world.lights.push(pointLight);
-}));
+});
 
-var groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png"); //grasslight-big.jpg
+const groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png"); //grasslight-big.jpg
 groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 //groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 groundTexture.repeat.set(50, 50);
 groundTexture.anisotropy = 32;
-var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
+const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
 ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
 ground.rotation.x = - Math.PI / 2;
 ground.position.y = -22;
 
 world.environment.push(ground);
+
+
+//Lenses
+cfg.lensesOptions.forEach(config => {
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(config.diameter, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+    lens.position.x = config.lensPosX;
+    lens.position.y = config.lensPosY;
+    lens.position.z = config.distance;
+    world.lenses.push(lens);
+})
