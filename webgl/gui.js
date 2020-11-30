@@ -1,17 +1,39 @@
-var cfg =
-{
-    shaderRoot: 'gouraud',
-    flatNormals: true,
-    wireframe: false,
-    animate: false,
-    fnvis: false,
-    vnvis: false,
-    shadervis: false,
-    lightPosX: -20.0,
-    lightPosY: 30.0,
-    lightPosZ: -50.0,
-    about: function () { }
+
+// focal length
+// diameter
+// reset
+// wireframe, vertex normal
+// 
+
+document.addEventListener("keydown", onDocumentKeyDown, false);
+function onDocumentKeyDown(event) {
+    var keyCode = event.which;
+    if (keyCode == 87) {
+        cfg.wireframe = !cfg.wireframe;
+        updateWireframe(cfg.wireframe);
+    } else if (keyCode == 65) {
+        cfg.animate = !cfg.animate;
+    }
 };
+
+function updateWireframe(value) {
+    ballwires.visible = value;
+    conewires.visible = value;
+    knotwires.visible = value;
+}
+
+function initControls() {
+    // controls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.dampingFactor = 0.15;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 50;
+    controls.maxDistance = 500;
+    controls.maxPolarAngle = Math.PI / 2;
+}
+
 
 function makePhongControls(obj, objstr) {
     var gObj = gui.addFolder(objstr);
@@ -39,57 +61,84 @@ function makePhongControls(obj, objstr) {
     return gObj;
 }
 
-function makeGui() {
+function refreshShaders(obj) {
+    obj.material = new THREE.ShaderMaterial({
+        uniforms: obj.material.uniforms,
+        lights: true,
+        vertexShader: getShader(cfg, 'vs'),
+        fragmentShader: getShader(cfg, 'ps'),
+    });
+    obj.material.needsUpdate = true;
+}
+
+function refreshNormals(obj) {
+    if (cfg.flatNormals)
+        obj.geometry.computeFlatVertexNormals();
+    else
+        obj.geometry.computeVertexNormals();
+}
+
+function updateLight() {
+    pointLight.position.set(cfg.lightPosX, cfg.lightPosY, cfg.lightPosZ);
+}
+
+function updateMagnify() {
+    //TODO:
+}
+
+function makeGui(objects, lenses) {
     gui = new dat.GUI();
 
     gui.add(cfg, 'about').name('Help & About');
 
+    //TODO:
     // gBall = makePhongControls(ball, 'ball');
     // gKnot = makePhongControls(knot, 'knot');
     // gCone = makePhongControls(cone, 'cone');
 
-    //light
-    var gLight = gui.addFolder('point light');
+    var gLight = gui.addFolder('Point Light');
     gLight.add(cfg, 'lightPosX').min(-60.0).max(60.0).step(1.0).name('lightX').listen().onChange(function (value) { updateLight(); });
     gLight.add(cfg, 'lightPosY').min(-60.0).max(60.0).step(1.0).name('lightY').listen().onChange(function (value) { updateLight(); });
     gLight.add(cfg, 'lightPosZ').min(-60.0).max(60.0).step(1.0).name('lightZ').listen().onChange(function (value) { updateLight(); });
 
-    gui.add(cfg, 'shaderRoot', { gouraud: 'gourand', phong: 'phong', toon: 'toon', depth: 'depth' }).name('shading mode').listen().onChange(function (value) {
-        refreshShaders(ball);
-        refreshShaders(cone);
-        refreshShaders(knot);
-        if (cfg.shadervis) {
+    var gMagnify = gui.addFolder('Magnifying Lens Options');
+    gMagnify.add(cfg, 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(); });
+    gMagnify.add(cfg, 'diameter').min(-60.0).max(60.0).step(1.0).name('Diameter').listen().onChange(function (value) { updateMagnify(); });
+
+
+    var gMesh = gui.addFolder('Mesh Options');
+    gMesh.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
+        objects.forEach(element => {
+            refreshNormal(element);
+
+        });
+        // ballvnhelper.update();
+        // conevnhelper.update();
+        // knotvnhelper.update();
+    });
+    gMesh.add(cfg, 'wireframe').name('wireframe (w)').listen().onChange(function (value) { updateWireframe(value); });
+    gMesh.add(cfg, 'fnVis').name('view fNormals').listen().onChange(function (value) {
+        // ballfnhelper.visible = value;
+        // conefnhelper.visible = value;
+        // knotfnhelper.visible = value;
+    });
+    gMesh.add(cfg, 'vnVis').name('view vNormals').listen().onChange(function (value) {
+        // ballvnhelper.visible = value;
+        // conevnhelper.visible = value;
+        // knotvnhelper.visible = value;
+    });
+
+    var gShaders = gui.addFolder('Shading Options');
+    gShaders.add(cfg, 'shaderRoot', { gouraud: 'gouraud', phong: 'phong' }).name('shading mode').listen().onChange(function (value) {
+        objects.forEach(element => {
+            refreshShaders(element);
+        });
+        if (cfg.shaderVis) {
             document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
             document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
         }
     });
-
-    gui.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
-        refreshNormals(ball);
-        refreshNormals(cone);
-        refreshNormals(knot);
-        ballvnhelper.update();
-        conevnhelper.update();
-        knotvnhelper.update();
-    });
-
-    gui.add(cfg, 'animate').name('animate (a)').listen();
-
-    gui.add(cfg, 'wireframe').name('wireframe (w)').listen().onChange(function (value) { updateWireframe(value); });
-
-    gui.add(cfg, 'fnvis').name('view fNormals').listen().onChange(function (value) {
-        ballfnhelper.visible = value;
-        conefnhelper.visible = value;
-        knotfnhelper.visible = value;
-    });
-
-    gui.add(cfg, 'vnvis').name('view vNormals').listen().onChange(function (value) {
-        ballvnhelper.visible = value;
-        conevnhelper.visible = value;
-        knotvnhelper.visible = value;
-    });
-
-    gui.add(cfg, 'shadervis').name('view shaders').listen().onChange(function (value) {
+    gShaders.add(cfg, 'shaderVis').name('view shaders').listen().onChange(function (value) {
         var e = document.getElementById('splash');
         if (value == false)
             e.style.display = 'none';
@@ -99,6 +148,8 @@ function makeGui() {
             e.style.display = 'block';
         }
     });
+
+    gui.add(cfg, 'animate').name('animate (a)').listen();
 
     gui.close();
 }

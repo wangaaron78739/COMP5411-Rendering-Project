@@ -15,14 +15,10 @@ orbitControls.minDistance = 5;
 orbitControls.maxDistance = 500;
 orbitControls.maxPolarAngle = Math.PI / 2;
 
-var objects = [];
-
-makeScene();
+makeScene(cfg, objects, lens, pointLight);
 const dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
 dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
 dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
-
-
 
 function animate() {
     requestAnimationFrame(animate);
@@ -31,6 +27,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-makeGui();
+makeGui(objects, lens);
 
 animate();
