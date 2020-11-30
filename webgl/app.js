@@ -1,3 +1,8 @@
+// SETUP stats box
+var stats = new Stats();
+stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+
 // SETUP THREE.js
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -48,7 +53,11 @@ function renderTo(target, fn) {
     fn(renderer);
 
 }
+
+requestAnimationFrame(animate);
+
 function animate() {
+    stats.begin();
     requestAnimationFrame(animate);
     orbitControls.update();
 
@@ -61,6 +70,8 @@ function animate() {
         // renderer.render(sceneScreen, cameraPerspective);
         renderer.render(sceneTotal, cameraPerspective);
     });
+
+    stats.end();
 }
 
 makeGui(world);

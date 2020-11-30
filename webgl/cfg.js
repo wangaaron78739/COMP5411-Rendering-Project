@@ -20,14 +20,14 @@ let defaultCfg =
     //lightPos
     lightPos: [
         {
-            lightPosX: -5.0,
-            lightPosY: 5.0,
-            lightPosZ: -5.0,
+            lightPosX: -50.0,
+            lightPosY: 30.0,
+            lightPosZ: -50.0,
         },
         {
-            lightPosX: 5.0,
-            lightPosY: 5.0,
-            lightPosZ: 5.0,
+            lightPosX: 50.0,
+            lightPosY: 30.0,
+            lightPosZ: 50.0,
         }
     ],
 
@@ -37,8 +37,6 @@ let defaultCfg =
             diameter: 2.0,
         }
     ],
-    //magnifyOptions
-
 
     about: function () { }
 };
@@ -59,7 +57,7 @@ function getShader(cfg, ty) {
     return getShaderCustom(cfg.shaderRoot, ty);
 }
 
-const cube = new THREE.Mesh(new THREE.BoxGeometry(20,20,20),
+const cube = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
     new THREE.ShaderMaterial({
         uniforms: THREE.UniformsUtils.merge([
             THREE.UniformsLib["lights"],
