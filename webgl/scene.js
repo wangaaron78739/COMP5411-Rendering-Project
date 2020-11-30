@@ -9,12 +9,3 @@ function makeBaseScene(cfg, camera, scene, world) {
 
     world.lights.forEach(light => { scene.add(light); });
 }
-
-
-function makeLensScene(cfg, camera, scene, world) {
-    world.lenses.forEach(lens => { scene.add(lens); });
-    var ambientLight = new THREE.AmbientLight(0x999999);
-    scene.add(ambientLight);
-
-    // world.lights.forEach(light => { scene.add(light); });
-}

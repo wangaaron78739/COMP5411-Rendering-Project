@@ -16,40 +16,58 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
 makeBaseScene(cfg, camera, scene, world);
 
-const sceneScreen = new THREE.Scene();
-((scene) => {
-    const materialScreen = new THREE.ShaderMaterial({
-        uniforms: { tDiffuse: { value: sceneTexture.texture } },
-        vertexShader: getShaderCustom('screen', 'vs'),
-        fragmentShader: getShaderCustom('screen', 'ps'),
+const NUM_LENS = 2;
 
-        depthWrite: false
-    });
-
-    const plane = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
-    const quad = new THREE.Mesh(plane, materialScreen);
-    quad.position.z = -100;
-    // quad.position.z = - 100;
-
-    scene.add(quad);
-})(sceneScreen);
-
-const sceneTotal = new THREE.Scene();
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
 const cameraPerspective = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 0;
+camera.position.z = 5;
+cameraOrtho.position.z = 0;
 cameraPerspective.position.z = 5;
 
 
-makeLensScene(cfg, camera, sceneTotal, world);
+let lensScenes = [];
+let prevTexture = sceneTexture;
+
+world.lenses.forEach(
+    (lensObj) => {
+        const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+
+        const sceneScreen = new THREE.Scene();
+        ((scene) => {
+            const materialScreen = new THREE.ShaderMaterial({
+                uniforms: { tDiffuse: { value: prevTexture.texture } },
+                vertexShader: getShaderCustom('screen', 'vs'),
+                fragmentShader: getShaderCustom('screen', 'ps'),
+
+                depthWrite: false
+            });
+
+            const plane = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
+            const quad = new THREE.Mesh(plane, materialScreen);
+            quad.position.z = -100;
+            // quad.position.z = - 100;
+
+            scene.add(quad);
+        })(sceneScreen);
+
+        const sceneTotal = new THREE.Scene();
+        // Add lenses (textured semispheres) to sceneTotal
+
+        const lens = { screen: sceneScreen, total: sceneTotal, tex: nextTexture };
+        lensScenes.push(lens);
+        prevTexture = nextTexture;
+        sceneTotal.add(lensObj);
+    }
+)
+lensScenes[world.lenses.length - 1].tex = null;
+
+
 
 // SETUP OrbitControls & DragControls
 const orbitControls = initControls();
 const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
 dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
 dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
-
-
 
 function renderTo(target, fn) {
     renderer.setRenderTarget(target);
@@ -65,15 +83,24 @@ function animate() {
     requestAnimationFrame(animate);
     orbitControls.update();
 
+
+
     renderTo(sceneTexture, function (renderer) {
         renderer.setClearColor(0xff0000, 0);
         renderer.render(scene, camera);
     });
-    renderTo(null, function (renderer) {
-        renderer.render(sceneScreen, cameraOrtho);
-        // renderer.render(sceneScreen, cameraPerspective);
-        renderer.render(sceneTotal, cameraPerspective);
-    });
+
+    for (const lens of lensScenes) {
+        renderTo(lens.tex, function (renderer) {
+            renderer.render(lens.screen, cameraOrtho);
+            renderer.render(lens.total, cameraPerspective);
+        })
+    }
+
+    // renderTo(null, function (renderer) {
+    //     renderer.render(sceneScreen, cameraOrtho);
+    //     renderer.render(sceneTotal, cameraPerspective);
+    // });
 
     stats.end();
 }
