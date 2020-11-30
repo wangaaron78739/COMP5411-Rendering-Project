@@ -21,11 +21,19 @@ const dragControls = new THREE.DragControls(world.objects, camera, renderer.domE
 dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
 dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
 
+
+var stats = new Stats();
+stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+
+requestAnimationFrame(animate);
+
 function animate() {
+    stats.begin();
     requestAnimationFrame(animate);
     orbitControls.update();
-    // renderer.clear(true, true, true);
     renderer.render(scene, camera);
+    stats.end();
 }
 
 makeGui(world);
