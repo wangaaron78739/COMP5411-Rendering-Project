@@ -37,14 +37,14 @@ let defaultCfg =
             lensPosY: 0.0,
             focalLength: 1.0,
             diameter: 4.0,
-            distance: -5.0,
+            distance: 1.0,
         },
         {
             lensPosX: 1.0,
             lensPosY: -1.0,
             focalLength: 1.0,
-            diameter: 4.0,
-            distance: -10.0,
+            diameter: 1.0,
+            distance: 10.0,
         }
     ],
 
@@ -116,9 +116,10 @@ world.environment.push(ground);
 
 //Lenses
 cfg.lensesOptions.forEach(config => {
-    const lens = new THREE.Mesh(new THREE.CircleGeometry(config.diameter, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
     lens.position.x = config.lensPosX;
     lens.position.y = config.lensPosY;
-    lens.position.z = config.distance;
+    lens.position.z = -config.distance;
+    lens.scale.set(config.diameter, config.diameter);
     world.lenses.push(lens);
 })

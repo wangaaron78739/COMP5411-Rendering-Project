@@ -29,7 +29,7 @@ let lensScenes = [];
 let prevTexture = sceneTexture;
 
 world.lenses.forEach(
-    (lensObj) => {
+    (lensObj, idx) => {
         const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
 
         const sceneScreen = new THREE.Scene();

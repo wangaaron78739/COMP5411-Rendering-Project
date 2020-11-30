@@ -63,10 +63,18 @@ function makePhongControls(gui, obj, objstr) {
     return gObj;
 }
 
+function updateMagnify(lens, lensId) {
+    //TODO:
+    // lens.scale.set(1.1,1.1,1.1);
+    lens.scale.set(cfg.lensesOptions[lensId].diameter, cfg.lensesOptions[lensId].diameter);
+    lens.position.z = -cfg.lensesOptions[lensId].distance;
+}
+
 function makeLensControls(gui, lens, lensId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(); });
-    gLens.add(cfg.lensesOptions[lensId], 'diameter').min(-60.0).max(60.0).step(1.0).name('Diameter').listen().onChange(function (value) { updateMagnify(); });
+    gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) { updateMagnify(lens, lensId); });
+    gLens.add(cfg.lensesOptions[lensId], 'diameter').min(1.0).max(5.0).step(0.05).name('Diameter').listen().onChange(function (value) { updateMagnify(lens, lensId); });
+    gLens.add(cfg.lensesOptions[lensId], 'distance').min(1.0).max(60.0).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(lens, lensId); });
 }
 
 function makeLightControls(gui, light, lightId) {
@@ -99,9 +107,6 @@ function refreshNormals(obj) {
         obj.geometry.computeVertexNormals();
 }
 
-function updateMagnify() {
-    //TODO:
-}
 
 function makeGui(world) {
     gui = new dat.GUI();
