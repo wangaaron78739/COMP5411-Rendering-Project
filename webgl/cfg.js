@@ -1,5 +1,9 @@
-var objects = [];
-var lens = [];
+var world = {
+    objects: [],
+    lenses: [],
+    lights: [],
+    environment: [],
+};
 let defaultCfg =
 {
     //shaderOptions
@@ -14,13 +18,27 @@ let defaultCfg =
     vnVis: false,
 
     //lightPos
-    lightPosX: -20.0,
-    lightPosY: 30.0,
-    lightPosZ: -50.0,
+    lightPos: [
+        {
+            lightPosX: -5.0,
+            lightPosY: 5.0,
+            lightPosZ: -5.0,
+        },
+        {
+            lightPosX: 5.0,
+            lightPosY: 5.0,
+            lightPosZ: 5.0,
+        }
+    ],
 
+    lensesOptions: [
+        {
+            focalLength: 1.0,
+            diameter: 2.0,
+        }
+    ],
     //magnifyOptions
-    focalLength: 1.0,
-    diameter: 2.0,
+
 
     about: function () { }
 };
@@ -58,11 +76,28 @@ const cube = new THREE.Mesh(new THREE.BoxGeometry(),
     })
 );
 
-objects.push(cube);
-objects.forEach(object => object.geometry.computeFlatVertexNormals());
+cube.name = 'cube';
+cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
+
+world.objects.push(cube);
+world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
 
-var pointLight = new THREE.PointLight(0xffffff);
-pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
-pointLight.position.set(cfg.lightPosX, cfg.lightPosY, cfg.lightPosZ);
+cfg.lightPos.forEach((pos => {
+    var pointLight = new THREE.PointLight(0xffffff);
+    pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
+    pointLight.position.set(pos.lightPosX, pos.lightPosY, pos.lightPosZ);
+    world.lights.push(pointLight);
+}));
 
+var groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png"); //grasslight-big.jpg
+groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+//groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+groundTexture.repeat.set(50, 50);
+groundTexture.anisotropy = 32;
+var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
+ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
+ground.rotation.x = - Math.PI / 2;
+ground.position.y = -22;
+
+world.environment.push(ground);
