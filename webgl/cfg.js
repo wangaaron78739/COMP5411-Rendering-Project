@@ -41,7 +41,7 @@ const defaultCfg =
             lensRadius1: 1000.0,
             lensRadius2: 1000.0,
             lensWidth: 0.5,
-            lensDiameter: 1.0,
+            lensDiameter: 10.0,
             lensDistance: Math.floor(Math.random() * 10.0) + minD
         });
     },
@@ -71,12 +71,14 @@ function addLensesToWorld(cfg, world) {
         const pos = new THREE.Vector3(config.lensPosX, config.lensPosY, -config.lensDistance)
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
+                tDiffuse: {value: null},
                 lensRadius1: { value: config.lensRadius1 },
                 lensRadius2: { value: config.lensRadius2 },
                 lensDiameter: { value: config.lensDiameter },
                 lensWidth: { value: config.lensWidth },
                 lensPosition: { value: pos },
-                screen: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                // screen: { value: renderer.getViewport() },
+                screen: { value: new THREE.Vector2(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio) },
                 eta: { value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25] }
             },
             lights: false,
