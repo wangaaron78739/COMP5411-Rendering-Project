@@ -29,6 +29,7 @@ cameraPerspective.position.z = 5;
 let lensScenes = [];
 let prevTexture = sceneTexture;
 let gui = makeGui(cfg, world);
+let [orbitControls, dragControls] = initControls(camera, cameraPerspective, renderer, world);
 
 function genLensScenes(world) {
     lensScenes = [];
@@ -62,11 +63,6 @@ function genLensScenes(world) {
     }
     lensScenes[world.lenses.length - 1].tex = null; //render last lens to screen 
 }
-
-
-// SETUP OrbitControls & DragControls 
-let [orbitControls, dragControls] = initControls(camera, cameraPerspective, renderer, world);
-
 
 function renderTo(target, fn) {
     renderer.setRenderTarget(target);
