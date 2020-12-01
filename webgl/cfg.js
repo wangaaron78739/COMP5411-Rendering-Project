@@ -39,8 +39,8 @@ const defaultCfg =
             lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
             lensRadius1Neg: false,
             lensRadius2Neg: false,
-            lensRadius1: 20000.0,
-            lensRadius2: 20000.0,
+            lensRadius1: 2000.0,
+            lensRadius2: 2000.0,
             lensWidth: 0,
             lensDiameter: 10.0,
         });
