@@ -102,6 +102,7 @@ function reload(gui, cfg, world) {
     genLensScenes(world);
     reloadLensGui(gui, cfg, world);
     updateDragControls(orbitControls, cameraPerspective, renderer, world);
+    world.lenses.forEach(lens => refreshLensShaders(lens));
     animate();
 }
 
