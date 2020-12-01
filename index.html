@@ -1,7 +1,47 @@
 <!DOCTYPE html>
 <html>
-
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #fff;
+            color: #000;
+            margin: 0px;
+            overflow: hidden;
+        }
+    
+        #about {
+            margin: 0px;
+            border: 3px solid #fff;
+            width: 870px;
+            height: 90%;
+            position: absolute;
+            margin-top: 50px;
+            top: 0px;
+            /* to center: 
+            left: 50%;
+            margin-left: -435px; 
+            */
+            left: 50px;
+            z-index: 4;
+            font-size: 20px;
+            color: white;
+            display: none;
+            background-color: #000;
+            opacity: 0.8;
+            filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr='#CC000000', EndColorStr='#CC000000');
+        }
+    
+        .codearea {
+            margin: 10px;
+            width: 850px;
+            height: 40%;
+            color: white;
+            background-color: #000;
+            font-size: 14px;
+        }
+    </style>
 <head>
+    
     <meta charset="utf-8">
     <title>Lens Renderer</title>
     <style src="webgl/style.css"></style>
@@ -25,6 +65,16 @@
     <script src="webgl/gui.js"></script>
     <script src="webgl/scene.js"></script>
     <script src="webgl/app.js"></script>
+    <script>
+        function hideAbout() {
+            var about = document.getElementById("about");
+            about.style.display = "none";
+        }
+    </script>
+    <div id="about" onclick="hideAbout();" style="display:none">
+        <center>About</center>
+        <p>By Anshuman Medhi and Aaron Wang</p>
+    </div>
 </body>
 
 </html>

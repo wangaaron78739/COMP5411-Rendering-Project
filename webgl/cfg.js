@@ -29,7 +29,10 @@ const defaultCfg =
 
     startingLensesNum: 3,
 
-    about: function () { },
+    about: function () {
+        var e = document.getElementById('about');
+        e.style.display = 'block';
+    },
     addLens: function () {
         let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].distance + 1) : 1;
 
