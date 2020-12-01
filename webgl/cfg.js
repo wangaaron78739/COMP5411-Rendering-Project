@@ -38,7 +38,9 @@ const defaultCfg =
         this.lensesOptions.push({
             lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
             lensRadius1: 20.0,
+            lensRadius1Neg: false,
             lensRadius2: 20.0,
+            lensRadius2Neg: false,
             lensWidth: 0,
             lensDiameter: 10.0,
         });
@@ -55,12 +57,13 @@ function addLensesToWorld(cfg, world) {
     world.lenses = [];
     cfg.lensesOptions.forEach((config, idx) => {
         const newPos = config.lensPosition.clone();
+        console.log(newPos);
         newPos.z = -config.lensPosition.z;
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
                 tDiffuse: { value: null },
-                lensRadius1: { value: config.lensRadius1 },
-                lensRadius2: { value: config.lensRadius2 },
+                lensRadius1: { value: (config.lensRadius1Neg ? -1.0 : 1.0) * config.lensRadius1 },
+                lensRadius2: { value: (config.lensRadius1Neg ? -1.0 : 1.0) * config.lensRadius2 },
                 lensDiameter: { value: config.lensDiameter },
                 lensWidth: { value: config.lensWidth },
                 lensPosition: { value: newPos },
