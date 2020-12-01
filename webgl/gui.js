@@ -95,21 +95,51 @@ function updateMagnify(gui, lens, value, lensId, maxId) {
     lens.position.y = cfg.lensesOptions[lensId].lensPosition.y;
     lens.position.z = -cfg.lensesOptions[lensId].lensPosition.z;
 
+    gui.__folders[`Lens ${lensId}`].__controllers[1]
+
+}
+
+function setDistanceBound(gui, lens, value, lensId, maxId) {
+    // Set max of previous
     if (lensId > 0) { gui.__folders[`Lens ${lensId - 1}`].__controllers[4].__max = value - 1; }
+    // Set min of next
     if (lensId < maxId) { gui.__folders[`Lens ${lensId + 1}`].__controllers[4].__min = value + 1; }
+}
+
+function setRadiusBound(gui, lens, value, lensId, maxId) {
+    // Set max of distance
+    gui.__folders[`Lens ${lensId}`].__controllers[3].__max = Math.min(gui.__folders[`Lens ${lensId}`].__controllers[0].getValue(), gui.__folders[`Lens ${lensId}`].__controllers[1].getValue()) / 2.0;
+}
+
+function setDiameterBound(gui, lens, value, lensId, maxId) {
+    // Set min of radius1 and 2
+    gui.__folders[`Lens ${lensId}`].__controllers[0].__min = value * 2;
+    gui.__folders[`Lens ${lensId}`].__controllers[1].__min = value * 2;
 }
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(1.0).max(1000.0).step(5.0).name('Radius 1').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(1.0).max(1000.0).step(5.0).name('Radius 2').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(1.0).max(1000.0).step(5.0).name('Radius 1').listen().onChange(function (value) {
+        updateMagnify(gui, lens, value, lensId, maxId);
+        setRadiusBound(gui, lens, value, lensId, maxId);
+    });
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(1.0).max(1000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
+        updateMagnify(gui, lens, value, lensId, maxId);
+        setRadiusBound(gui, lens, value, lensId, maxId);
+    });
     gLens.add(cfg.lensesOptions[lensId], 'lensWidth').min(0.0).max(1.0).step(0.05).name('Width').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
-    gLens.add(cfg.lensesOptions[lensId], 'lensDiameter').min(1.0).max(10.0).step(0.05).name('Diameter').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
+    gLens.add(cfg.lensesOptions[lensId], 'lensDiameter').min(1.0).max(10.0).step(0.05).name('Diameter').listen().onChange(function (value) {
+        updateMagnify(gui, lens, value, lensId, maxId);
+        setDiameterBound(gui, lens, value, lensId, maxId);
+    });
     let minD = 1.0;
     let maxD = 60.0;
     if (lensId > 0) minD = cfg.lensesOptions[lensId - 1].lensPosition.z;
     if (lensId < maxId) maxD = cfg.lensesOptions[lensId + 1].lensPosition.z;
-    gLens.add(cfg.lensesOptions[lensId].lensPosition, 'z').min(minD).max(maxD).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
+    gLens.add(cfg.lensesOptions[lensId].lensPosition, 'z').min(minD).max(maxD).step(1.0).name('Distance').listen().onChange(function (value) {
+        updateMagnify(gui, lens, value, lensId, maxId);
+        setDistanceBound(gui, lens, value, lensId, maxId);
+    });
 
 }
 
