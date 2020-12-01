@@ -36,7 +36,8 @@ const defaultCfg =
     addLens: function () {
         let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].lensPosition.z + 1) : 1;
         this.lensesOptions.push({
-            lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
+            lensPosition: new THREE.Vector3(0 * 10.0 - 5.0, 0 * 10.0 - 5.0, Math.floor(1 * 10.0) + minD),
+            // lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
             lensRadius1Neg: false,
             lensRadius2Neg: false,
             lensRadius1: 2000.0,

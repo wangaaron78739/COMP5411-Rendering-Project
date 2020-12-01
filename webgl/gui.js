@@ -40,9 +40,22 @@ function refreshLensShaders(obj) {
     obj.material.uniforms.lensRadius2.value = (config.lensRadius2Neg ? -1.0 : 1.0) * config.lensRadius2;
     obj.material.uniforms.lensDiameter.value = config.lensDiameter;
     obj.material.uniforms.lensWidth.value = config.lensWidth;
-    obj.material.uniforms.lensPosition.value.copy(obj.position);
-    obj.material.uniforms.lensPosition.value.z = -obj.position.z;
 
+    let pos = obj.material.uniforms.lensPosition.value;
+    pos = obj.getWorldPosition(pos);
+    pos.project(cameraPerspective);
+
+    let widthHalf = obj.material.uniforms.screen.value.x / 2;
+    let heightHalf = obj.material.uniforms.screen.value.y / 2;
+
+    pos.x = (pos.x * widthHalf) + widthHalf;
+    pos.y = (pos.y * heightHalf) + heightHalf;
+    // pos.z = -obj.position.z;
+
+    // obj.material.uniforms.lensPosition.value.copy(obj.position);
+    // obj.material.uniforms.lensPosition.value.z = -obj.position.z;
+    console.log(obj.material.uniforms.lensPosition.value);
+    
     obj.material.needsUpdate = true;
 }
 
@@ -91,9 +104,10 @@ function makePhongControls(gui, obj, objstr) {
 function updateMagnify(gui, lens, value, lensId, maxId) {
     refreshLensShaders(lens);
     lens.scale.set(cfg.lensesOptions[lensId].lensDiameter, cfg.lensesOptions[lensId].lensDiameter);
-    lens.position.x = cfg.lensesOptions[lensId].lensPosition.x;
-    lens.position.y = cfg.lensesOptions[lensId].lensPosition.y;
-    lens.position.z = -cfg.lensesOptions[lensId].lensPosition.z;
+    const p = cfg.lensesOptions[lensId].lensPosition;
+    lens.position.x = p.x;
+    lens.position.y = p.y;
+    lens.position.z = -p.z;
 }
 
 function setDistanceBound(gui, lens, value, lensId, maxId) {

@@ -89,11 +89,6 @@ function animate() {
         });
     });
 
-    // renderTo(null, function (renderer) {
-    //     renderer.render(sceneScreen, cameraOrtho);
-    //     renderer.render(sceneTotal, cameraPerspective);
-    // });
-
     stats.end();
 }
 

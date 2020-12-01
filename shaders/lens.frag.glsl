@@ -31,14 +31,14 @@ void main(){
     float wallZ=gl_FragCoord.z;
     float Radius1=lensRadius1*100.;
     float Radius2=lensRadius2*100.;
-    float Diameter=lensDiameter*100.;
+    float Diameter=lensDiameter*10.;
     
     float tmp1=sqrt(Radius1*Radius1-Diameter*Diameter/4.)*sign(Radius1);
     float tmp2=sqrt(Radius2*Radius2-Diameter*Diameter/4.)*sign(Radius2);
-    vec3 lensCenter1=lensPosition+vec3(0,0,-(lensWidth/2.-tmp1));
     vec3 lensCenter2=lensPosition+vec3(0,0,(lensWidth/2.-tmp2));
-    lensCenter1.xy+=screen.xy/2.;
-    lensCenter2.xy+=screen.xy/2.;
+    vec3 lensCenter1=lensPosition+vec3(0,0,-(lensWidth/2.-tmp1));
+    // lensCenter1.xy+=screen.xy/2.;
+    // lensCenter2.xy+=screen.xy/2.;
     
     vec3 cameraCenter=vec3(screen.xy/2.,0);
     vec3 ray=normalize(gl_FragCoord.xyz-cameraCenter);
@@ -47,13 +47,12 @@ void main(){
     vec4 intersection1=raycirc(cameraCenter,ray,lensCenter1,Radius1,+1.);
     vec3 normal1=normalize(intersection1.xyz-lensCenter1);
     
-    // float eta[6] = float[6]{1.15, 1.17, 1.19, 1.21, 1.23, 1.25};
     vec3 colors[6];
     float eta_i;
     vec3 ray2,normal2,ray3,intersection3;
     vec4 intersection2;
     
-    // #pragma unroll_loop_start
+    #pragma unroll_loop_start
     for(int i=0;i<6;i++){
         // eta_i=1.;
         // eta_i=1./eta[i];
@@ -69,7 +68,7 @@ void main(){
         
         colors[i]=texture2D(tDiffuse,intersection3.xy/screen.xy).rgb;
     }
-    // #pragma unroll_loop_end
+    #pragma unroll_loop_end
     
     float r=colors[0].r*.5;
     float y=dot(vec3(2.,2.,-1.),colors[1])/6.;
