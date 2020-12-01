@@ -123,7 +123,7 @@ function makeLensControls(gui, cfg, lens, lensId, maxId) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(2u000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(2000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
