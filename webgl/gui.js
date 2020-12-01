@@ -105,7 +105,7 @@ function setDistanceBound(gui, lens, value, lensId, maxId) {
 
 function setRadiusBound(gui, lens, value, lensId, maxId) {
     // Set max of distance
-    gui.__folders[`Lens ${lensId}`].__controllers[5].__max = Math.min(gui.__folders[`Lens ${lensId}`].__controllers[0].getValue(), gui.__folders[`Lens ${lensId}`].__controllers[2].getValue()) / 2.0;
+    gui.__folders[`Lens ${lensId}`].__controllers[5].__max = Math.min(Math.min(gui.__folders[`Lens ${lensId}`].__controllers[0].getValue(), gui.__folders[`Lens ${lensId}`].__controllers[2].getValue()) / 2.0, 10);
 }
 
 function setDiameterBound(gui, lens, value, lensId, maxId) {
