@@ -34,16 +34,30 @@ const defaultCfg =
         e.style.display = 'block';
     },
     addLens: function () {
-        let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].distance + 1) : 1;
-
+        let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].lensDistance + 1) : 1;
         this.lensesOptions.push({
             lensPosX: Math.random() * 10.0 - 5.0,
             lensPosY: Math.random() * 10.0 - 5.0,
-            focalLength: Math.floor(Math.random() * 10.0) / 5.0 + 1,
-            diameter: Math.floor(Math.random() * 10.0) / 5.0 + 1,
-            distance: Math.floor(Math.random() * 10.0) + minD
+            lensRadius1: 1000.0,
+            lensRadius2: 1000.0,
+            lensWidth: 0.5,
+            lensDiameter: 1.0,
+            lensDistance: Math.floor(Math.random() * 10.0) + minD
         });
     },
+    // addLens: function () {
+    //     let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].lensDistance + 1) : 1;
+    //     let diameter = Math.floor(Math.random() * 10.0) / 5.0 + 1
+    //     this.lensesOptions.push({
+    //         lensPosX: Math.random() * 10.0 - 5.0,
+    //         lensPosY: Math.random() * 10.0 - 5.0,
+    //         lensRadius1: max(Math.random() * 10.0 - 5.0, diameter + 1),
+    //         lensRadius2: max(Math.random() * 10.0 - 5.0, diameter + 1),
+    //         lensWidth: Math.random() * 10.0 - 5.0,
+    //         lensDiameter: diameter,
+    //         lensDistance: Math.floor(Math.random() * 10.0) + minD
+    //     });
+    // },
     removeLens: function () {
         this.lensesOptions.pop();
     }
@@ -53,17 +67,17 @@ const defaultCfg =
 function addLensesToWorld(cfg, world) {
     world.lenses.forEach(lens => delete lens);
     world.lenses = [];
-    cfg.lensesOptions.forEach(config => {
-        const pos = new THREE.Vector3(config.lensPosX, config.lensPosY, -config.distance)
+    cfg.lensesOptions.forEach((config, idx) => {
+        const pos = new THREE.Vector3(config.lensPosX, config.lensPosY, -config.lensDistance)
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
-                lensRadius1: { value: 100.0 },
-                lensRadius2: { value: 100.0 },
-                lensDiameter: { value: 2.0 },
-                lensWidth: { value: 1.0 },
+                lensRadius1: { value: config.lensRadius1 },
+                lensRadius2: { value: config.lensRadius2 },
+                lensDiameter: { value: config.lensDiameter },
+                lensWidth: { value: config.lensWidth },
                 lensPosition: { value: pos },
                 screen: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                eta: {value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25]}
+                eta: { value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25] }
             },
             lights: false,
             vertexShader: getShaderCustom('lens', 'vs'),
@@ -71,7 +85,8 @@ function addLensesToWorld(cfg, world) {
         }));
         // const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
         lens.position = pos;
-        lens.scale.set(config.diameter, config.diameter);
+        lens.scale.set(config.lensDiameter, config.lensDiameter);
+        lens.idx = idx;
         world.lenses.push(lens);
     });
 }
