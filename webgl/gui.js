@@ -33,13 +33,15 @@ function initControls(camera, cameraPerspective, renderer, world) {
 
 
 function refreshLensShaders(obj) {
-    cfg.lensesOptions[obj.idx].lensPosition = obj.position;
+    cfg.lensesOptions[obj.idx].lensPosition.x = obj.position.x;
+    cfg.lensesOptions[obj.idx].lensPosition.y = obj.position.y;
     const config = cfg.lensesOptions[obj.idx];
     obj.material.uniforms.lensRadius1.value = config.lensRadius1;
     obj.material.uniforms.lensRadius2.value = config.lensRadius2;
     obj.material.uniforms.lensDiameter.value = config.lensDiameter;
     obj.material.uniforms.lensWidth.value = config.lensWidth;
-    obj.material.uniforms.lensPosition.value = obj.position;
+    obj.material.uniforms.lensPosition.value.copy(obj.position);
+    obj.material.uniforms.lensPosition.value.z = -obj.position.z;
 
     obj.material.needsUpdate = true;
 }
@@ -87,13 +89,14 @@ function makePhongControls(gui, obj, objstr) {
 
 
 function updateMagnify(gui, lens, value, lensId, maxId) {
-    //TODO: update texture
     refreshLensShaders(lens);
     lens.scale.set(cfg.lensesOptions[lensId].lensDiameter, cfg.lensesOptions[lensId].lensDiameter);
-    lens.position = cfg.lensesOptions[lensId].position;
+    lens.position.x = cfg.lensesOptions[lensId].lensPosition.x;
+    lens.position.y = cfg.lensesOptions[lensId].lensPosition.y;
+    lens.position.z = -cfg.lensesOptions[lensId].lensPosition.z;
 
-    if (lensId > 0) { gui.__folders[`Lens ${lensId - 1}`].__controllers[2].__max = value - 1; }
-    if (lensId < maxId) { gui.__folders[`Lens ${lensId + 1}`].__controllers[2].__min = value + 1; }
+    if (lensId > 0) { gui.__folders[`Lens ${lensId - 1}`].__controllers[4].__max = value - 1; }
+    if (lensId < maxId) { gui.__folders[`Lens ${lensId + 1}`].__controllers[4].__min = value + 1; }
 }
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
