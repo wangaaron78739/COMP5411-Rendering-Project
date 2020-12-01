@@ -58,12 +58,13 @@ function addLensesToWorld(cfg, world) {
         newPos.z = -config.lensPosition.z;
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
+                tDiffuse: { value: null },
                 lensRadius1: { value: config.lensRadius1 },
                 lensRadius2: { value: config.lensRadius2 },
                 lensDiameter: { value: config.lensDiameter },
                 lensWidth: { value: config.lensWidth },
                 lensPosition: { value: newPos },
-                screen: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                screen: { value: new THREE.Vector2(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio) },
                 eta: { value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25] }
             },
             lights: false,

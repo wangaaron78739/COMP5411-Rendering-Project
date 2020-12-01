@@ -53,6 +53,8 @@ function genLensScenes(world) {
             scene.add(quad);
         })(sceneScreen);
 
+        world.lenses.forEach((lens) => {lens.material.uniforms.tDiffuse.value = prevTexture.texture})
+
         const sceneTotal = new THREE.Scene();
         // Add lenses (textured semispheres) to sceneTotal
 
