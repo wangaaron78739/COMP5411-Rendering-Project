@@ -35,8 +35,8 @@ void main(){
     
     float tmp1=sqrt(Radius1*Radius1-Diameter*Diameter/4.)*sign(Radius1);
     float tmp2=sqrt(Radius2*Radius2-Diameter*Diameter/4.)*sign(Radius2);
-    vec3 lensCenter1=lensPosition*vec3(1,1,-1)+vec3(0,0,-(lensWidth/2.-tmp1));
-    vec3 lensCenter2=lensPosition*vec3(1,1,-1)+vec3(0,0,(lensWidth/2.-tmp2));
+    vec3 lensCenter1=lensPosition+vec3(0,0,-(lensWidth/2.-tmp1));
+    vec3 lensCenter2=lensPosition+vec3(0,0,(lensWidth/2.-tmp2));
     lensCenter1+=vec3(screen.xy,0)/2.;
     lensCenter2+=vec3(screen.xy,0)/2.;
     
@@ -86,12 +86,6 @@ void main(){
     gl_FragColor.a=1.;
     // gl_FragColor.a=intersection1.a*intersection2.a;
     
-    // vec3 direct=rayplane(cameraCenter.xyz,ray,wallZ);
-    // gl_FragColor.rgba=texture2D(tDiffuse,direct.xy/screen.xy);
-    vec3 direct=rayplane(intersection1.xyz,ray2,wallZ);
-    // vec3 direct=intersection1.xyz;
-    gl_FragColor.rgba=texture2D(tDiffuse,direct.xy/screen.xy);
-    
     // gl_FragColor.rgba=texture2D(tDiffuse, vUv);
     // gl_FragColor.rgba=texture2D(tDiffuse,gl_FragCoord.xy/screen.xy);
     // gl_FragColor.rg=gl_FragCoord.xy/screen.xy;
@@ -106,4 +100,10 @@ void main(){
     // gl_FragColor.rgb=gl_FragCoord.xyz / 1000.;
     // gl_FragColor.rgb=vec3(R,G,B);
     // gl_FragColor.rgb=colors[5];
+    
+    // vec3 direct=rayplane(cameraCenter.xyz,ray,wallZ);
+    // gl_FragColor.rgba=texture2D(tDiffuse,direct.xy/screen.xy);
+    vec3 direct=rayplane(intersection1.xyz,ray3,wallZ);
+    // vec3 direct=intersection1.xyz;
+    gl_FragColor.rgba=texture2D(tDiffuse,direct.xy/screen.xy);
 }
