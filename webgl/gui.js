@@ -119,11 +119,11 @@ function setDiameterBound(gui, lens, value, lensId, maxId) {
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(100.0).max(2000.0).step(5.0).name('Radius 1').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(100.0).max(200000.0).step(5.0).name('Radius 1').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(2000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(200000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
