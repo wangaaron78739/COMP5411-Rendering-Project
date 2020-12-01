@@ -54,10 +54,23 @@ function addLensesToWorld(cfg, world) {
     world.lenses.forEach(lens => delete lens);
     world.lenses = [];
     cfg.lensesOptions.forEach(config => {
-        const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-        lens.position.x = config.lensPosX;
-        lens.position.y = config.lensPosY;
-        lens.position.z = -config.distance;
+        const pos = new THREE.Vector3(config.lensPosX, config.lensPosY, -config.distance)
+        const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
+            uniforms: {
+                lensRadius1: { value: 10.0 },
+                lensRadius2: { value: 10.0 },
+                lensDiameter: { value: 50.0 },
+                lensWidth: { value: 1.0 },
+                lensPosition: { value: pos },
+                screen: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                eta: {value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25]}
+            },
+            lights: false,
+            vertexShader: getShaderCustom('lens', 'vs'),
+            fragmentShader: getShaderCustom('lens', 'ps'),
+        }));
+        // const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+        lens.position = pos;
         lens.scale.set(config.diameter, config.diameter);
         world.lenses.push(lens);
     });
