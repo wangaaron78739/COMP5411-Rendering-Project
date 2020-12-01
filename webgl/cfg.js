@@ -27,7 +27,7 @@ const defaultCfg =
 
     lensesOptions: [],
 
-    startingLensesNum: 3,
+    startingLensesNum: 1,
 
     about: function () {
         var e = document.getElementById('about');
@@ -57,9 +57,9 @@ function addLensesToWorld(cfg, world) {
         const pos = new THREE.Vector3(config.lensPosX, config.lensPosY, -config.distance)
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
-                lensRadius1: { value: 10.0 },
-                lensRadius2: { value: 10.0 },
-                lensDiameter: { value: 50.0 },
+                lensRadius1: { value: 100.0 },
+                lensRadius2: { value: 100.0 },
+                lensDiameter: { value: 2.0 },
                 lensWidth: { value: 1.0 },
                 lensPosition: { value: pos },
                 screen: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
