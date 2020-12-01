@@ -1,3 +1,6 @@
+// SETUP config
+var [cfg, world] = initConfig();
+
 // SETUP stats box
 var stats = new Stats();
 stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -25,9 +28,12 @@ cameraPerspective.position.z = 5;
 
 let lensScenes = [];
 let prevTexture = sceneTexture;
+let gui = makeGui(cfg, world);
 
-world.lenses.forEach(
-    (lensObj, idx) => {
+function genLensScenes(world) {
+    lensScenes = [];
+    prevTexture = sceneTexture;
+    for (let idx = world.lenses.length - 1; idx >= 0; idx--) {
         const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
 
         const sceneScreen = new THREE.Scene();
@@ -36,7 +42,6 @@ world.lenses.forEach(
                 uniforms: { tDiffuse: { value: prevTexture.texture } },
                 vertexShader: getShaderCustom('screen', 'vs'),
                 fragmentShader: getShaderCustom('screen', 'ps'),
-
                 depthWrite: false
             });
 
@@ -53,27 +58,21 @@ world.lenses.forEach(
         const lens = { screen: sceneScreen, total: sceneTotal, tex: nextTexture };
         lensScenes.push(lens);
         prevTexture = nextTexture;
-        sceneTotal.add(lensObj);
+        sceneTotal.add(world.lenses[idx]);
     }
-)
-lensScenes[world.lenses.length - 1].tex = null;
+    lensScenes[world.lenses.length - 1].tex = null; //render last lens to screen 
+}
 
 
+// SETUP OrbitControls & DragControls 
+let [orbitControls, dragControls] = initControls(camera, cameraPerspective, renderer, world);
 
-// SETUP OrbitControls & DragControls
-const orbitControls = initControls();
-const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
-dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
-dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
 
 function renderTo(target, fn) {
     renderer.setRenderTarget(target);
     renderer.clear();
     fn(renderer);
-
 }
-
-requestAnimationFrame(animate);
 
 function animate() {
     stats.begin();
@@ -85,12 +84,12 @@ function animate() {
         renderer.render(scene, camera);
     });
 
-    for (const lens of lensScenes) {
+    lensScenes.forEach(lens => {
         renderTo(lens.tex, function (renderer) {
             renderer.render(lens.screen, cameraOrtho);
             renderer.render(lens.total, cameraPerspective);
-        })
-    }
+        });
+    });
 
     // renderTo(null, function (renderer) {
     //     renderer.render(sceneScreen, cameraOrtho);
@@ -100,6 +99,12 @@ function animate() {
     stats.end();
 }
 
-makeGui(world);
+function reload(gui, cfg, world) {
+    addLensesToWorld(cfg, world);
+    genLensScenes(world);
+    reloadLensGui(gui, cfg, world);
+    updateDragControls(orbitControls, cameraPerspective, renderer, world);
+    animate();
+}
 
-animate();
+reload(gui, cfg, world);

@@ -15,17 +15,27 @@ function updateWireframe(value) {
     knotwires.visible = value;
 }
 
-function initControls() {
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+function initControls(camera, cameraPerspective, renderer, world) {
+    const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
     //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-    controls.dampingFactor = 0.15;
-    controls.screenSpacePanning = false;
-    controls.minDistance = 50;
-    controls.maxDistance = 500;
-    controls.maxPolarAngle = Math.PI / 2;
+    orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    orbitControls.dampingFactor = 0.15;
+    orbitControls.screenSpacePanning = false;
+    orbitControls.minDistance = 50;
+    orbitControls.maxDistance = 500;
+    orbitControls.maxPolarAngle = Math.PI / 2;
 
-    return controls;
+    const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
+    dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
+    dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
+    return [orbitControls, dragControls];
+}
+
+function updateDragControls(orbitControls, cameraPerspective, renderer, world) {
+    dragControls.dispose();
+    dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
+    dragControls.addEventListener('dragstart', function () { orbitControls.enabled = false; });
+    dragControls.addEventListener('dragend', function () { orbitControls.enabled = true; });
 }
 
 
@@ -65,7 +75,7 @@ function updateMagnify(gui, lens, value, lensId, maxId) {
     if (lensId < maxId) { gui.__folders[`Lens ${lensId + 1}`].__controllers[2].__min = value + 1; }
 }
 
-function makeLensControls(gui, lens, lensId, maxId) {
+function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
     gLens.add(cfg.lensesOptions[lensId], 'focalLength').min(-60.0).max(60.0).step(1.0).name('Focal Length').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
@@ -78,7 +88,7 @@ function makeLensControls(gui, lens, lensId, maxId) {
     gLens.add(cfg.lensesOptions[lensId], 'distance').min(minD).max(maxD).step(1.0).name('Distance').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
 }
 
-function makeLightControls(gui, light, lightId) {
+function makeLightControls(gui, cfg, light, lightId) {
     var gLight = gui.addFolder(`Light ${lightId}`);
     gLight.add(cfg.lightPos[lightId], 'lightPosX').min(-60.0).max(60.0).step(1.0).name('X Coordinate').listen().onChange(function (value) {
         light.position.set(cfg.lightPos[lightId].lightPosX, cfg.lightPos[lightId].lightPosY, cfg.lightPos[lightId].lightPosZ);
@@ -108,9 +118,39 @@ function refreshNormals(obj) {
         obj.geometry.computeVertexNormals();
 }
 
+// dat.GUI.prototype.removeFolders = function () {
+//     this.__folders.forEach(
+//         folder => {
+//             let name = folder.name;
+//             folder.close();
+//             this.__ul.removeChild(folder.domElement.parentNode);
+//             delete this.__folders[name];
+//         }
+//     )
+//     this.onResize();
+//     folder.close();
+// }
 
-function makeGui(world) {
-    gui = new dat.GUI();
+dat.GUI.prototype.removeFolder = function (name) {
+    var folder = this.__folders[name];
+    if (!folder) {
+        return;
+    }
+    folder.close();
+    this.__ul.removeChild(folder.domElement.parentNode);
+    delete this.__folders[name];
+    this.onResize();
+}
+
+function reloadLensGui(gui, cfg, world) {
+    for (const [key, value] of Object.entries(gui.__folders['Lens'].__folders)) {
+        gui.__folders['Lens'].removeFolder(key);
+    }
+    world.lenses.forEach((lens, idx) => { makeLensControls(gui.__folders['Lens'], cfg, lens, idx, world.lenses.length - 1); });
+}
+
+function makeGui(cfg, world) {
+    let gui = new dat.GUI();
 
     gui.add(cfg, 'about').name('Help & About');
 
@@ -118,10 +158,12 @@ function makeGui(world) {
     world.objects.forEach(object => { makePhongControls(gObject, object, object.name); });
 
     var gMagnify = gui.addFolder('Lens');
-    world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, lens, idx, world.lenses.length - 1); });
+    gMagnify.add({ func: function () { cfg.addLens(); reload(gui, cfg, world); } }, "func").name("Add Lens");
+    gMagnify.add({ func: function () { cfg.removeLens(); reload(gui, cfg, world); } }, "func").name("Remove Lens");
+    // world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, cfg, lens, idx, world.lenses.length - 1); });
 
     var gLight = gui.addFolder('Lights');
-    world.lights.forEach((light, idx) => { makeLightControls(gLight, light, idx); });
+    world.lights.forEach((light, idx) => { makeLightControls(gLight, cfg, light, idx); });
 
     var gMesh = gui.addFolder('Mesh Options');
     gMesh.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
@@ -157,4 +199,5 @@ function makeGui(world) {
     gui.add(cfg, 'animate').name('animate (a)').listen();
 
     gui.close();
+    return gui;
 }

@@ -1,10 +1,4 @@
-var world = {
-    objects: [],
-    lenses: [],
-    lights: [],
-    environment: [],
-};
-let defaultCfg =
+const defaultCfg =
 {
     //shaderOptions
     shaderRoot: 'gouraud',
@@ -31,27 +25,100 @@ let defaultCfg =
         }
     ],
 
-    lensesOptions: [
-        {
-            lensPosX: 5.0,
-            lensPosY: 5.0,
-            focalLength: 1.0,
-            diameter: 4.0,
-            distance: 5.0,
-        },
-        {
-            lensPosX: 0.0,
-            lensPosY: -0.0,
-            focalLength: 1.0,
-            diameter: 1.0,
-            distance: 10.0,
-        }
-    ],
+    lensesOptions: [],
 
-    about: function () { }
+    startingLensesNum: 3,
+
+    about: function () { },
+    addLens: function () {
+        let minD = this.lensesOptions.length ? (this.lensesOptions[this.lensesOptions.length - 1].distance + 1) : 1;
+
+        this.lensesOptions.push({
+            lensPosX: Math.random() * 10.0 - 5.0,
+            lensPosY: Math.random() * 10.0 - 5.0,
+            focalLength: Math.floor(Math.random() * 10.0) / 5.0 + 1,
+            diameter: Math.floor(Math.random() * 10.0) / 5.0 + 1,
+            distance: Math.floor(Math.random() * 10.0) + minD
+        });
+    },
+    removeLens: function () {
+        this.lensesOptions.pop();
+    }
 };
 
-var cfg = defaultCfg;
+
+function addLensesToWorld(cfg, world) {
+    world.lenses.forEach(lens => delete lens);
+    world.lenses = [];
+    cfg.lensesOptions.forEach(config => {
+        const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+        lens.position.x = config.lensPosX;
+        lens.position.y = config.lensPosY;
+        lens.position.z = -config.distance;
+        lens.scale.set(config.diameter, config.diameter);
+        world.lenses.push(lens);
+    });
+}
+
+function initConfig() {
+    var world = {
+        objects: [],
+        lenses: [],
+        lights: [],
+        environment: [],
+    };
+    var cfg = defaultCfg;
+    const cube = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
+        new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.merge([
+                THREE.UniformsLib["lights"],
+                {
+                    mAmbient: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, // should generally match color
+                    mDiffuse: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, 
+                    mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                    mShininess: { type: "f", value: 40.0 },
+                    mKa: { type: "f", value: 0.3 },
+                    mKd: { type: "f", value: 0.8 },
+                    mKs: { type: "f", value: 0.8 }
+                }
+            ]),
+            lights: true,
+            vertexShader: getShader(cfg, 'vs'),
+            fragmentShader: getShader(cfg, 'ps'),
+        })
+    );
+
+    cube.name = 'cube';
+    cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
+    world.objects.push(cube);
+
+    world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
+
+
+    cfg.lightPos.forEach(pos => {
+        const pointLight = new THREE.PointLight(0xffffff);
+        pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
+        pointLight.position.set(pos.lightPosX, pos.lightPosY, pos.lightPosZ);
+        world.lights.push(pointLight);
+    });
+
+    const groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png");
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(50, 50);
+    groundTexture.anisotropy = 32;
+    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
+    ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
+    ground.rotation.x = - Math.PI / 2;
+    ground.position.y = -22;
+
+    world.environment.push(ground);
+
+    for (let i = 0; i < cfg.startingLensesNum; i++) {
+        cfg.addLens();
+    }
+
+    return [cfg, world];
+}
 
 function getSourceSynch(url) {
     var req = new XMLHttpRequest();
@@ -66,57 +133,3 @@ function getShaderCustom(name, ty) {
 function getShader(cfg, ty) {
     return getShaderCustom(cfg.shaderRoot, ty);
 }
-
-const cube = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20),
-    new THREE.ShaderMaterial({
-        uniforms: THREE.UniformsUtils.merge([
-            THREE.UniformsLib["lights"],
-            {
-                mAmbient: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, // should generally match color
-                mDiffuse: { type: "c", value: new THREE.Color(0x0000ff) }, //0x00dd00, 
-                mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
-                mShininess: { type: "f", value: 40.0 },
-                mKa: { type: "f", value: 0.3 },
-                mKd: { type: "f", value: 0.8 },
-                mKs: { type: "f", value: 0.8 }
-            }
-        ]),
-        lights: true,
-        vertexShader: getShader(cfg, 'vs'),
-        fragmentShader: getShader(cfg, 'ps'),
-    })
-);
-
-cube.name = 'cube';
-cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
-world.objects.push(cube);
-
-world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
-
-
-cfg.lightPos.forEach(pos => {
-    const pointLight = new THREE.PointLight(0xffffff);
-    pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 8), new THREE.MeshBasicMaterial({ color: 0xffffff })));
-    pointLight.position.set(pos.lightPosX, pos.lightPosY, pos.lightPosZ);
-    world.lights.push(pointLight);
-});
-
-const groundTexture = THREE.ImageUtils.loadTexture("tex/checker.png");
-groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-groundTexture.repeat.set(50, 50);
-groundTexture.anisotropy = 32;
-const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
-ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
-ground.rotation.x = - Math.PI / 2;
-ground.position.y = -22;
-
-world.environment.push(ground);
-
-cfg.lensesOptions.forEach(config => {
-    const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-    lens.position.x = config.lensPosX;
-    lens.position.y = config.lensPosY;
-    lens.position.z = -config.distance;
-    lens.scale.set(config.diameter, config.diameter);
-    world.lenses.push(lens);
-})
