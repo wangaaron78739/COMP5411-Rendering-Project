@@ -85,6 +85,7 @@ function animate() {
     lensScenes.forEach(lens => {
         renderTo(lens.tex, function (renderer) {
             renderer.render(lens.screen, cameraOrtho);
+            // renderer.render(lens.total, cameraOrtho);
             renderer.render(lens.total, cameraPerspective);
         });
     });

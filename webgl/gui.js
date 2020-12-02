@@ -54,7 +54,7 @@ function refreshLensShaders(obj) {
 
     // obj.material.uniforms.lensPosition.value.copy(obj.position);
     // obj.material.uniforms.lensPosition.value.z = -obj.position.z;
-    console.log(obj.material.uniforms.lensPosition.value);
+    // console.log(obj.material.uniforms.lensPosition.value);
     
     obj.material.needsUpdate = true;
 }
