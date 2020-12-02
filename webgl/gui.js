@@ -35,6 +35,8 @@ function initControls(camera, cameraPerspective, renderer, world) {
 function refreshLensShaders(obj) {
     cfg.lensesOptions[obj.idx].lensPosition.x = obj.position.x;
     cfg.lensesOptions[obj.idx].lensPosition.y = obj.position.y;
+    world.lensRings[obj.idx].position.x = obj.position.x;
+    world.lensRings[obj.idx].position.y = obj.position.y;
     const config = cfg.lensesOptions[obj.idx];
     obj.material.uniforms.lensRadius1.value = (config.lensRadius1Neg ? -1.0 : 1.0) * config.lensRadius1;
     obj.material.uniforms.lensRadius2.value = (config.lensRadius2Neg ? -1.0 : 1.0) * config.lensRadius2;
@@ -55,7 +57,7 @@ function refreshLensShaders(obj) {
     // obj.material.uniforms.lensPosition.value.copy(obj.position);
     // obj.material.uniforms.lensPosition.value.z = -obj.position.z;
     // console.log(obj.material.uniforms.lensPosition.value);
-    
+
     obj.material.needsUpdate = true;
 }
 
@@ -108,7 +110,13 @@ function updateMagnify(gui, lens, value, lensId, maxId) {
     lens.position.x = p.x;
     lens.position.y = p.y;
     lens.position.z = -p.z;
+
+    world.lensRings[lensId].scale.set(cfg.lensesOptions[lensId].lensDiameter, cfg.lensesOptions[lensId].lensDiameter);
+    world.lensRings[lensId].position.x = p.x;
+    world.lensRings[lensId].position.y = p.y;
+    world.lensRings[lensId].position.z = -p.z;
 }
+
 
 function setDistanceBound(gui, lens, value, lensId, maxId) {
     // Set max of previous
@@ -119,24 +127,25 @@ function setDistanceBound(gui, lens, value, lensId, maxId) {
 
 function setRadiusBound(gui, lens, value, lensId, maxId) {
     // Set max of distance
-    gui.__folders[`Lens ${lensId}`].__controllers[5].__max = Math.min(Math.min(gui.__folders[`Lens ${lensId}`].__controllers[0].getValue(), gui.__folders[`Lens ${lensId}`].__controllers[2].getValue()) / 2.0, 10);
+    // gui.__folders[`Lens ${lensId}`].__controllers[5].__min = 1.0 / Math.min(Math.min(gui.__folders[`Lens ${lensId}`].__controllers[0].getValue(), gui.__folders[`Lens ${lensId}`].__controllers[2].getValue()) / 2.0, 10);
 }
 
 function setDiameterBound(gui, lens, value, lensId, maxId) {
     // Set min of radius1 and 2
-    gui.__folders[`Lens ${lensId}`].__controllers[0].__min = value * 2;
-    gui.__folders[`Lens ${lensId}`].__controllers[2].__min = value * 2;
+    // gui.__folders[`Lens ${lensId}`].__controllers[0].__max = (1.0 / value * 2);
+    // gui.__folders[`Lens ${lensId}`].__controllers[2].__max = (1.0 / value * 2);
 }
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(100.0).max(20000.0).step(5.0).name('Radius 1').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(0.001).max(1.0).step(0.0001).name('Radius 1').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
     gLens.add(cfg.lensesOptions[lensId], 'lensRadius1Neg').name('R1 Concave').listen().onChange(function (value) {
+        refreshLensShaders(lens);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(20000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(0.001).max(1.0).step(0.0001).name('Radius 2').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
@@ -184,13 +193,6 @@ function refreshShaders(obj) {
 
 
 
-function refreshNormals(obj) {
-    if (cfg.flatNormals)
-        obj.geometry.computeFlatVertexNormals();
-    else
-        obj.geometry.computeVertexNormals();
-}
-
 dat.GUI.prototype.removeFolder = function (name) {
     var folder = this.__folders[name];
     if (!folder) {
@@ -225,16 +227,6 @@ function makeGui(cfg, world) {
     var gLight = gui.addFolder('Lights');
     world.lights.forEach((light, idx) => { makeLightControls(gLight, cfg, light, idx); });
 
-    var gMesh = gui.addFolder('Mesh Options');
-    gMesh.add(cfg, 'flatNormals').name('flat normals').listen().onChange(function (value) {
-        world.objects.forEach(element => { refreshNormal(element); });
-    });
-    gMesh.add(cfg, 'wireframe').name('wireframe (w)').listen().onChange(function (value) { updateWireframe(value); });
-    gMesh.add(cfg, 'fnVis').name('view fNormals').listen().onChange(function (value) {
-    });
-    gMesh.add(cfg, 'vnVis').name('view vNormals').listen().onChange(function (value) {
-    });
-
     var gShaders = gui.addFolder('Shading Options');
     gShaders.add(cfg, 'shaderRoot', { gouraud: 'gouraud', phong: 'phong' }).name('shading mode').listen().onChange(function (value) {
         world.objects.forEach(element => {
@@ -257,6 +249,9 @@ function makeGui(cfg, world) {
     });
 
     gui.add(cfg, 'animate').name('animate (a)').listen();
+    gui.add(cfg, 'lensBorder').name('Draw Lens Border').listen().onChange(function (value) {
+        refreshAllLenses(world);
+    });
 
     gui.close();
     return gui;

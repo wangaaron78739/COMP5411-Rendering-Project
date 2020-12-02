@@ -20,7 +20,7 @@ const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.i
 makeBaseScene(cfg, camera, scene, world);
 
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
-const cameraPerspective = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const cameraPerspective = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 5;
 cameraOrtho.position.z = 0;
 cameraPerspective.position.z = 5;
@@ -62,6 +62,7 @@ function genLensScenes(world) {
         lensScenes.push(lens);
         prevTexture = nextTexture;
         sceneTotal.add(world.lenses[idx]);
+        sceneTotal.add(world.lensRings[idx]);
     }
     lensScenes[world.lenses.length - 1].tex = null; //render last lens to screen 
 }
@@ -93,12 +94,16 @@ function animate() {
     stats.end();
 }
 
+function refreshAllLenses(world) {
+    world.lenses.forEach(lens => refreshLensShaders(lens));
+}
+
 function reload(gui, cfg, world) {
     addLensesToWorld(cfg, world);
     genLensScenes(world);
     reloadLensGui(gui, cfg, world);
     updateDragControls(orbitControls, cameraPerspective, renderer, world);
-    world.lenses.forEach(lens => refreshLensShaders(lens));
+    refreshAllLenses(world);
     animate();
 }
 
