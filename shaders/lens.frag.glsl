@@ -28,22 +28,27 @@ vec3 rayplane(vec3 orig,vec3 ray,float wallZ){
 }
 
 void main(){
-    float flip = -1.;
+    float flip = 1.;
     // float wallZ=100.;
     float wallZ=gl_FragCoord.z;
-    float Radius1=lensRadius1*100.;
-    float Radius2=lensRadius2*100.;
-    float Diameter=lensDiameter*100.;
+    float Radius1=lensRadius1*30000.;
+    float Radius2=lensRadius2*30000.;
+    float Diameter=lensDiameter;
+    // float Diameter=lensDiameter*100.;
+    // float Diameter=lensDiameter/100.;
+
+    vec3 lensPos = vec3(lensPosition.xy, 0);
     
     float tmp1=sqrt(Radius1*Radius1-Diameter*Diameter/4.)*sign(Radius1)*flip;
-    vec3 lensCenter1=lensPosition+vec3(0,0,-(lensWidth/2.-tmp1));
+    vec3 lensCenter1=lensPos+vec3(0,0,-(lensWidth/2.-tmp1));
     
     float tmp2=sqrt(Radius2*Radius2-Diameter*Diameter/4.)*sign(Radius2)*flip;
-    vec3 lensCenter2=lensPosition+vec3(0,0,(lensWidth/2.-tmp2));
+    vec3 lensCenter2=lensPos+vec3(0,0,(lensWidth/2.-tmp2));
     
     // vec3 cameraCenter=vec3(gl_FragCoord.xy,0.);
-    vec3 cameraCenter=vec3(lensPosition.xy,0);
-    // vec3 cameraCenter=vec3(screen.xy/2.,0);
+    vec3 cameraCenter=vec3(lensPosition.xy,-lensPosition.z);
+    // vec3 cameraCenter=vec3(lensPosition.xy,0.);
+    // vec3 cameraCenter=vec3(screen.xy/2.,0.);
     // vec3 ray=vec3(0,0,1);
     vec3 ray=normalize(gl_FragCoord.xyz-cameraCenter);
     
@@ -60,14 +65,15 @@ void main(){
     for(int i=0;i<6;i++){
         // eta_i=1.;
         // eta_i=1./eta[i];
-        eta_i=1./eta[i];
+        eta_i=1./eta[i]/eta[i];
         ray2=refract(ray,normal1,eta_i);
         
         intersection2=raycirc(intersection1.xyz,ray2,lensCenter2,Radius2,-flip);
         normal2=normalize(intersection2.xyz-lensCenter2);
         
         // ray3=ray2;
-        ray3=refract(ray2,normal2,1./eta_i);
+        // ray3=refract(ray2,normal2,1./eta_i);
+        ray3=refract(ray2,normal2,eta_i);
         
         intersection3=rayplane(intersection2.xyz,ray3,wallZ);
         
@@ -104,11 +110,12 @@ void main(){
     // gl_FragColor.rgb=gl_FragCoord.xyz / 1000.;
     // gl_FragColor.rgb=abs(colors[0] - colors[5]);
     gl_FragColor.rgb=vec3(R,G,B);
-    float alpha = intersection1.a*intersection2.a;
+    float alpha = intersection1.a;
+    // float alpha = intersection1.a*intersection2.a;
     gl_FragColor.rgb=texture2D(tDiffuse,gl_FragCoord.xy/screen.xy).rgb*(1.-alpha)+gl_FragColor.rgb*alpha;
     // gl_FragColor.rgb = alpha * vec3(1.,1.,1.);
     // gl_FragColor.rgb=colors[5];
-    // gl_FragColor.r=gl_FragCoord.z/10.;
+    // gl_FragColor.r=gl_FragCoord.z > 0. ? 1. : 0.;
     
     // vec3 direct=rayplane(cameraCenter.xyz,ray2,wallZ);
     // gl_FragColor.rgba=texture2D(tDiffuse,direct.xy/screen.xy);
