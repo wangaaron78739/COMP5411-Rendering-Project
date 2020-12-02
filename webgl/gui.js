@@ -136,7 +136,7 @@ function makeLensControls(gui, cfg, lens, lensId, maxId) {
     });
     gLens.add(cfg.lensesOptions[lensId], 'lensRadius1Neg').name('R1 Concave').listen().onChange(function (value) {
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(20000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(100.0).max(10000.0).step(5.0).name('Radius 2').listen().onChange(function (value) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });

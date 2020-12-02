@@ -13,10 +13,13 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.autoClear = false;
 document.body.appendChild(renderer.domElement);
 
+// const texOpts = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat }
+const texOpts = { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat }
+
 // SETUP THREE scenes
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+const sceneTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, texOpts);
 makeBaseScene(cfg, camera, scene, world);
 
 const cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 10000, 10000);
@@ -35,7 +38,7 @@ function genLensScenes(world) {
     lensScenes = [];
     prevTexture = sceneTexture;
     for (let idx = world.lenses.length - 1; idx >= 0; idx--) {
-        const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat });
+        const nextTexture = new THREE.WebGLRenderTarget(window.innerWidth * 2, window.innerHeight * 2, texOpts);
 
         const sceneScreen = new THREE.Scene();
         ((scene) => {
