@@ -4,12 +4,7 @@ const defaultCfg =
     shaderRoot: 'gouraud',
     shaderVis: false,
     animate: false,
-
-    //meshOptions
-    flatNormals: true,
-    wireframe: false,
-    fnVis: false,
-    vnVis: false,
+    lensBorder: true,
 
     //lightPos
     lightPos: [
@@ -38,11 +33,11 @@ const defaultCfg =
         this.lensesOptions.push({
             lensPosition: new THREE.Vector3(0 * 10.0 - 5.0, 0 * 10.0 - 5.0, Math.floor(1 * 10.0) + minD),
             // lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
-            lensRadius1Neg: false,
+            lensRadius1Neg: true,
             lensRadius2Neg: false,
-            lensRadius1: 2000.0,
-            lensRadius2: 2000.0,
-            lensWidth: 0,
+            lensRadius1: 0.1,
+            lensRadius2: 0.1,
+            lensWidth: 0.5,
             lensDiameter: 10.0,
         });
     },
@@ -55,7 +50,9 @@ const defaultCfg =
 
 function addLensesToWorld(cfg, world) {
     world.lenses.forEach(lens => delete lens);
+    world.lensRings.forEach(ring => delete ring);
     world.lenses = [];
+    world.lensRings = [];
     cfg.lensesOptions.forEach((config, idx) => {
         const newPos = config.lensPosition.clone();
         console.log(newPos);
@@ -75,10 +72,14 @@ function addLensesToWorld(cfg, world) {
             vertexShader: getShaderCustom('lens', 'vs'),
             fragmentShader: getShaderCustom('lens', 'ps'),
         }));
+        const lensRing = new THREE.Mesh(new THREE.RingGeometry(0.95, 1, 64), new THREE.MeshBasicMaterial({ color: 0xFF0000 }));
         lens.position.copy(newPos);
         lens.scale.set(config.lensDiameter, config.lensDiameter);
+        lensRing.position.copy(newPos);
+        lensRing.scale.set(config.lensDiameter, config.lensDiameter);
         lens.idx = idx;
         world.lenses.push(lens);
+        world.lensRings.push(lensRing);
     });
 }
 
@@ -86,6 +87,7 @@ function initConfig() {
     var world = {
         objects: [],
         lenses: [],
+        lensRings: [],
         lights: [],
         environment: [],
     };
