@@ -37,6 +37,7 @@ const defaultCfg =
             lensRadius2Neg: false,
             lensRadius1: 0.1,
             lensRadius2: 0.1,
+            sameRadius: true,
             lensWidth: 0.5,
             lensDiameter: 10.0,
         });
@@ -49,13 +50,10 @@ const defaultCfg =
 
 
 function addLensesToWorld(cfg, world) {
-    world.lenses.forEach(lens => delete lens);
-    world.lensRings.forEach(ring => delete ring);
     world.lenses = [];
     world.lensRings = [];
     cfg.lensesOptions.forEach((config, idx) => {
         const newPos = config.lensPosition.clone();
-        console.log(newPos);
         newPos.z = -config.lensPosition.z;
         const lens = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.ShaderMaterial({
             uniforms: {
