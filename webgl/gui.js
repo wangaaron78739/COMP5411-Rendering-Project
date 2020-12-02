@@ -35,8 +35,13 @@ function initControls(camera, cameraPerspective, renderer, world) {
 function refreshLensShaders(obj) {
     cfg.lensesOptions[obj.idx].lensPosition.x = obj.position.x;
     cfg.lensesOptions[obj.idx].lensPosition.y = obj.position.y;
-    world.lensRings[obj.idx].position.x = obj.position.x;
-    world.lensRings[obj.idx].position.y = obj.position.y;
+    const lensRing = world.lensRings[obj.idx];
+    lensRing.position.x = obj.position.x;
+    lensRing.position.y = obj.position.y;
+    lensRing.material.transparent = true;
+    lensRing.material.opacity = cfg.lensBorder ? 1.0 : 0.0;
+    lensRing.material.needsUpdate = true;
+
     const config = cfg.lensesOptions[obj.idx];
     obj.material.uniforms.lensRadius1.value = (config.lensRadius1Neg ? -1.0 : 1.0) / config.lensRadius1;
     obj.material.uniforms.lensRadius2.value = (config.lensRadius2Neg ? -1.0 : 1.0) / config.lensRadius2;
@@ -139,18 +144,24 @@ function setDiameterBound(gui, lens, value, lensId, maxId) {
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(0.001).max(1.0).step(0.0001).name('Radius 1').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(0.001).max(1.0).step(0.0001).name('Curvature 1').listen().onChange(function (value) {
+        if (cfg.lensesOptions[lensId].sameRadius) {
+            cfg.lensesOptions[lensId].lensRadius2 = cfg.lensesOptions[lensId].lensRadius1;
+        }
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1Neg').name('R1 Concave').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1Neg').name('Curvature 1 Pos').listen().onChange(function (value) {
         refreshLensShaders(lens);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(0.001).max(1.0).step(0.0001).name('Radius 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(0.001).max(1.0).step(0.0001).name('Curvature 2').listen().onChange(function (value) {
+        if (cfg.lensesOptions[lensId].sameRadius) {
+            cfg.lensesOptions[lensId].lensRadius1 = cfg.lensesOptions[lensId].lensRadius2;
+        }
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2Neg').name('R2 Concave').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2Neg').name('Curvature 2 Pos').listen().onChange(function (value) {
         refreshLensShaders(lens);
     });
     gLens.add(cfg.lensesOptions[lensId], 'lensWidth').min(0.0).max(10.0).step(0.05).name('Width').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
@@ -166,7 +177,12 @@ function makeLensControls(gui, cfg, lens, lensId, maxId) {
         updateMagnify(gui, lens, value, lensId, maxId);
         setDistanceBound(gui, lens, value, lensId, maxId);
     });
-
+    gLens.add(cfg.lensesOptions[lensId], 'sameRadius').name('Same Curvature').listen().onChange(function (value) {
+        if (value) {
+            cfg.lensesOptions[lensId].lensRadius2 = cfg.lensesOptions[lensId].lensRadius1;
+        }
+        refreshLensShaders(lens);
+    });
 }
 
 function makeLightControls(gui, cfg, light, lightId) {
