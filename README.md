@@ -18,12 +18,13 @@ The simplest way is to use the python builtin http server
    # In the root of this project folder run
    python -m http.server
 ```
+After this, open `localhost:8000` (or whatever port is is opened) in a browser 
 
 
 ## Workload Breakdown
 | Name               | Contribution                                 | Percentage |
 | ------------------ |:---------------------------------------------|:---------- |
-| Anshuman Medhi     | Writina debugging the lens fragment shader   | 50%        |
+| Anshuman Medhi     | Writing debugging the lens fragment shader   | 50%        |
 | Aaron Si-yuan Wang | Controls, UI and Scene, Debugging the Shader | 50%        |
 
 Lens Parameters:
@@ -31,9 +32,7 @@ Lens Parameters:
 - Radius of curvature of each surface
 - Diameter of lens
 - Thickness of glass
-- Position of lens (XYZ)
-- Rotation of lens
-
+- Position of lens (XYZ) 
 
 ## Major Technical Challenges
 
@@ -50,3 +49,4 @@ The lens distortion fragment shader (`shaders/lens.frag.glsl`) uses a restricted
 | OrbitControls | https://threejs.org/docs/#examples/en/controls/OrbitControls |
 | DragControls  | https://threejs.org/docs/#examples/en/controls/DragControls |
 | Stats         | https://github.com/mrdoob/stats.js/ |
+| Phong Shading | http://www.cse.ust.hk/~psander/metarenderer/ |
