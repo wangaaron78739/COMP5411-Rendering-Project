@@ -10,12 +10,21 @@ Group Members:
 
 ## How to run the program
 
+You must run a server that to serve the `index.html`, `tex/` and `shaders/` files
+
+The simplest way is to use the python builtin http server 
+
+```bash
+   # In the root of this project folder run
+   python -m http.server
+```
+
 
 ## Workload Breakdown
-| Name               | Contribution   | Percentage |
-| ------------------ |:-------------- |:---------- |
-| Anshuman Medhi     | Shading        | 50%        |
-| Aaron Si-yuan Wang | User Interface | 50%        |
+| Name               | Contribution                                 | Percentage |
+| ------------------ |:---------------------------------------------|:---------- |
+| Anshuman Medhi     | Writina debugging the lens fragment shader   | 50%        |
+| Aaron Si-yuan Wang | Controls, UI and Scene, Debugging the Shader | 50%        |
 
 Lens Parameters:
 
@@ -26,24 +35,18 @@ Lens Parameters:
 - Rotation of lens
 
 
-## Lens Simulation Procedure
+## Major Technical Challenges
 
-**First**
-Sort the lenses so that any `X` is rendered after all the lenses that `X` can be see
+The whole project is rendered using multiple passes (one for each lens), this is set up in `app.js` so that first the scene is rendered, then each lens distorts the scene, outputting a new texture that is fed to the next lens.
 
-**For each lens**
-1. Render the scene into a texture `t = new THREE.WebGLRenderTarget` with the camera at the focal point of the Lens (calculated by `lensCenter - focalLength * lensNormal`)
-2. Distort the scene texture `t` according to lens properties to get `t'`
-3. Paint the scene texture `t'` onto the visible surface of the lens 
-   - TODO: can we find the visible surface? or render on both surfaces and let the visibility sort itself 
-
-**After rendering all lenses**
-Render the whole scene, treating lenses as normal textured objects
+The lens distortion fragment shader (`shaders/lens.frag.glsl`) uses a restricted form of raytracing to simulate how the path of light to the camera is distorted by refraction through the lens, including different refractive indices for the different color components of light.
 
 ## Libraries Used
 
-| Library | Link                                |
-| ------- |:----------------------------------- |
-| ThreeJS | https://github.com/mrdoob/three.js/ |
-| dat.gui | https://github.com/dataarts/dat.gui |
-| Stats   | https://github.com/mrdoob/stats.js/ |
+| Library       | Link                                |
+| -------       |:----------------------------------- |
+| ThreeJS       | https://github.com/mrdoob/three.js/ |
+| dat.gui       | https://github.com/dataarts/dat.gui |
+| OrbitControls | https://threejs.org/docs/#examples/en/controls/OrbitControls |
+| DragControls  | https://threejs.org/docs/#examples/en/controls/DragControls |
+| Stats         | https://github.com/mrdoob/stats.js/ |
