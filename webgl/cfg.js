@@ -1,7 +1,6 @@
 const defaultCfg =
 {
     //shaderOptions
-    shaderRoot: 'phong',
     lensBorder: true,
 
     //lightPos
@@ -104,8 +103,8 @@ function initConfig() {
                 }
             ]),
             lights: true,
-            vertexShader: getShader(cfg, 'vs'),
-            fragmentShader: getShader(cfg, 'ps'),
+            vertexShader: getShaderCustom('phong', 'vs'),
+            fragmentShader: getShaderCustom('phong', 'ps'),
         })
     );
 
@@ -132,8 +131,8 @@ function initConfig() {
                 }
             ]),
             lights: true,
-            vertexShader: getShader(cfg, 'vs'),
-            fragmentShader: getShader(cfg, 'ps'),
+            vertexShader: getShaderCustom('phong', 'vs'),
+            fragmentShader: getShaderCustom('phong', 'ps'),
         })
     );
 
@@ -158,8 +157,8 @@ function initConfig() {
                 }
             ]),
             lights: true,
-            vertexShader: getShader(cfg, 'vs'),
-            fragmentShader: getShader(cfg, 'ps'),
+            vertexShader: getShaderCustom('phong', 'vs'),
+            fragmentShader: getShaderCustom('phong', 'ps'),
         })
     );
 
@@ -215,7 +214,4 @@ function getSourceSynch(url) {
 
 function getShaderCustom(name, ty) {
     return getSourceSynch(document.getElementById(`${name}-${ty}-glsl`).src);
-}
-function getShader(cfg, ty) {
-    return getShaderCustom(cfg.shaderRoot, ty);
 }

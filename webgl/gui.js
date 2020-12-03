@@ -186,24 +186,17 @@ function reloadLensGui(gui, cfg, world) {
 function makeGui(cfg, world) {
     let gui = new dat.GUI();
 
-    gui.add(cfg, 'about').name('Help & About');
+    gui.add(cfg, 'about').name('About');
 
     var gObject = gui.addFolder('Objects');
     world.objects.forEach(object => { makePhongControls(gObject, object, object.name); });
 
-    var gMagnify = gui.addFolder('Lens');
-    gMagnify.add({ func: function () { cfg.addLens(); reload(gui, cfg, world); } }, "func").name("Add Lens");
-    gMagnify.add({ func: function () { cfg.removeLens(); reload(gui, cfg, world); } }, "func").name("Remove Lens");
-
     var gLight = gui.addFolder('Lights');
     world.lights.forEach((light, idx) => { makeLightControls(gLight, cfg, light, idx); });
 
-    var gShaders = gui.addFolder('Shading Options');
-    gShaders.add(cfg, 'shaderRoot', { gouraud: 'gouraud', phong: 'phong' }).name('shading mode').listen().onChange(function (value) {
-        world.objects.forEach(element => {
-            refreshShaders(element);
-        });
-    });
+    var gMagnify = gui.addFolder('Lens');
+    gMagnify.add({ func: function () { cfg.addLens(); reload(gui, cfg, world); } }, "func").name("Add Lens");
+    gMagnify.add({ func: function () { cfg.removeLens(); reload(gui, cfg, world); } }, "func").name("Remove Lens");
 
     gui.add(cfg, 'lensBorder').name('Draw Lens Border').listen().onChange(function (value) {
         refreshAllLenses(world);
