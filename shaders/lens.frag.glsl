@@ -4,6 +4,7 @@ uniform float lensRadius1;
 uniform float lensRadius2;
 uniform float lensDiameter;
 uniform float lensWidth;
+uniform float chroma;
 uniform vec3 lensPosition;
 uniform float eta[6];
 uniform vec2 screen;
@@ -29,8 +30,6 @@ vec3 rayplane(vec3 orig, vec3 ray, float wallZ) {
 
 void main() {
 	float flip = 1.;
-	// float wallZ=100.;
-	float wallZ = gl_FragCoord.z;
 	float Radius1 = lensRadius1 * 30000.;
 	float Radius2 = lensRadius2 * 30000.;
 	float Diameter = lensDiameter;
@@ -75,7 +74,7 @@ void main() {
 		// ray3=refract(ray2,normal2,1./eta_i);
 		ray3 = refract(ray2, normal2, eta_i);
 
-		intersection3 = rayplane(intersection2.xyz, ray3, wallZ);
+		intersection3 = rayplane(intersection2.xyz, ray3, chroma);
 
 		colors[i] = texture2D(tDiffuse, intersection3.xy / screen.xy).rgb;
 	}
