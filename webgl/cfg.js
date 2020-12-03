@@ -2,8 +2,6 @@ const defaultCfg =
 {
     //shaderOptions
     shaderRoot: 'phong',
-    shaderVis: false,
-    animate: false,
     lensBorder: true,
 
     //lightPos
@@ -167,8 +165,8 @@ function initConfig() {
         console.log(x, y)
         const wall = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
         wall.rotation.y = Math.PI / 2 * y;
-        wall.position.x = -150 * x;
-        wall.position.z = -150 * z;
+        wall.position.x = -200 * x;
+        wall.position.z = -200 * z;
 
         world.environment.push(wall);
     }

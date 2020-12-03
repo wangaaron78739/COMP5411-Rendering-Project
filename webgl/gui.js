@@ -22,7 +22,7 @@ function initControls(camera, cameraPerspective, renderer, world) {
     orbitControls.dampingFactor = 0.15;
     orbitControls.screenSpacePanning = false;
     orbitControls.minDistance = 50;
-    orbitControls.maxDistance = 500;
+    orbitControls.maxDistance = 200;
     orbitControls.maxPolarAngle = Math.PI / 2;
 
     const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
@@ -249,23 +249,8 @@ function makeGui(cfg, world) {
         world.objects.forEach(element => {
             refreshShaders(element);
         });
-        if (cfg.shaderVis) {
-            document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
-            document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
-        }
-    });
-    gShaders.add(cfg, 'shaderVis').name('view shaders').listen().onChange(function (value) {
-        var e = document.getElementById('splash');
-        if (value == false)
-            e.style.display = 'none';
-        else {
-            document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
-            document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
-            e.style.display = 'block';
-        }
     });
 
-    gui.add(cfg, 'animate').name('animate (a)').listen();
     gui.add(cfg, 'lensBorder').name('Draw Lens Border').listen().onChange(function (value) {
         refreshAllLenses(world);
     });
