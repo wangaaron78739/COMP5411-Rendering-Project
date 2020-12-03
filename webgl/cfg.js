@@ -32,8 +32,9 @@ const defaultCfg =
             lensPosition: new THREE.Vector3(0 * 10.0 - 5.0, 0 * 10.0 - 5.0, Math.floor(1 * 10.0) + minD),
             // lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
             convex: false,
-            lensRadius1: 0.1,
-            lensRadius2: 0.1,
+            lensRadius1: 0.2,
+            lensRadius2: 0.2,
+            chroma: 0.,
             sameRadius: true,
             lensWidth: 0.5,
             lensDiameter: 10.0,
@@ -59,6 +60,7 @@ function addLensesToWorld(cfg, world) {
                 lensRadius2: { value: (config.lensRadius1Neg ? -1.0 : 1.0) * config.lensRadius2 },
                 lensDiameter: { value: config.lensDiameter },
                 lensWidth: { value: config.lensWidth },
+                chroma: { value: config.chroma },
                 lensPosition: { value: newPos },
                 screen: { value: new THREE.Vector2(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio) },
                 eta: { value: [1.15, 1.17, 1.19, 1.21, 1.23, 1.25] }
@@ -67,7 +69,7 @@ function addLensesToWorld(cfg, world) {
             vertexShader: getShaderCustom('lens', 'vs'),
             fragmentShader: getShaderCustom('lens', 'ps'),
         }));
-        const lensRing = new THREE.Mesh(new THREE.RingGeometry(0.95, 1, 64), new THREE.MeshBasicMaterial({ color: 0xFF0000 }));
+        const lensRing = new THREE.Mesh(new THREE.RingGeometry(0.95, 1, 64), new THREE.MeshBasicMaterial({ color: 0xffffff }));
         lens.position.copy(newPos);
         lens.scale.set(config.lensDiameter, config.lensDiameter);
         lensRing.position.copy(newPos);
@@ -183,7 +185,7 @@ function initConfig() {
     const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture, side: THREE.DoubleSide });
     ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
     ground.rotation.x = - Math.PI / 2;
-    ground.position.y = -200;
+    ground.position.y = -20;
 
     world.environment.push(ground);
     for (let [x, y, z] of [[1, 1, 0], [-1, 1, 0], [0, 0, -1], [0, 0, 1]]) {

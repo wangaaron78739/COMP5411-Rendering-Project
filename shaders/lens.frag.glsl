@@ -4,6 +4,7 @@ uniform float lensRadius1;
 uniform float lensRadius2;
 uniform float lensDiameter;
 uniform float lensWidth;
+uniform float chroma;
 uniform vec3 lensPosition;
 uniform float eta[6];
 uniform vec2 screen;
@@ -73,7 +74,7 @@ void main() {
 		ray3 = refract(ray2, backFaceNormal, eta_i);
 
 		// Intersect with the 'back wall' (aka original scene)
-		intersection3 = rayplane(backFaceHit.xyz, ray3, 0.);
+		intersection3 = rayplane(backFaceHit.xyz, ray3, chroma);
 
 		// sample the texture
 		colors[i] = texture2D(tDiffuse, intersection3.xy / screen.xy).rgb;
