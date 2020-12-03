@@ -10,6 +10,13 @@ Group Members:
 
 ## How to run the program
 
+You must run a server that to serve the `index.html`, `tex/` and `shaders/` files
+
+The simplest way is to use the python builting http server 
+
+   # In the root of this project folder run
+   python -m http.server
+
 
 ## Workload Breakdown
 | Name               | Contribution   | Percentage |
