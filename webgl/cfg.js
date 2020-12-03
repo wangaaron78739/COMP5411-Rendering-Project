@@ -1,7 +1,7 @@
 const defaultCfg =
 {
     //shaderOptions
-    shaderRoot: 'gouraud',
+    shaderRoot: 'phong',
     shaderVis: false,
     animate: false,
     lensBorder: true,
@@ -112,10 +112,39 @@ function initConfig() {
 
     cube.name = 'cube';
     cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
+    cube.position.y = -12;
+
     world.objects.push(cube);
 
     world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(20, 30, 128),
+        new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.merge([
+                THREE.UniformsLib["lights"],
+                {
+                    mAmbient: { type: "c", value: new THREE.Color(0xffff00) }, //0x00dd00, // should generally match color
+                    mDiffuse: { type: "c", value: new THREE.Color(0xffff00) }, //0x00dd00, 
+                    mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                    mShininess: { type: "f", value: 40.0 },
+                    mKa: { type: "f", value: 0.3 },
+                    mKd: { type: "f", value: 0.8 },
+                    mKs: { type: "f", value: 0.8 }
+                }
+            ]),
+            lights: true,
+            vertexShader: getShader(cfg, 'vs'),
+            fragmentShader: getShader(cfg, 'ps'),
+        })
+    );
+
+    cone.name = 'cone';
+    cone.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
+    cone.position.y = +10.0;
+    // cone.position.set(new THREE.Vector3(0.0, 0.0, 0));
+    world.objects.push(cone);
+
+    world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
     cfg.lightPos.forEach(pos => {
         const pointLight = new THREE.PointLight(0xffffff);
@@ -128,12 +157,22 @@ function initConfig() {
     groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.repeat.set(50, 50);
     groundTexture.anisotropy = 32;
-    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture });
+    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture, side: THREE.DoubleSide });
     ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
     ground.rotation.x = - Math.PI / 2;
-    ground.position.y = -22;
+    ground.position.y = -20;
 
     world.environment.push(ground);
+    for (let [x, y, z] of [[1, 1, 0], [-1, 1, 0], [0, 0, -1], [0, 0, 1]]) {
+        console.log(x, y)
+        const wall = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
+        wall.rotation.y = Math.PI / 2 * y;
+        wall.position.x = -150 * x;
+        wall.position.z = -150 * z;
+
+        world.environment.push(wall);
+    }
+
 
     for (let i = 0; i < cfg.startingLensesNum; i++) {
         cfg.addLens();

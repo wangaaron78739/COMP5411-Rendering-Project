@@ -1,5 +1,22 @@
 # COMP5411-Rendering-Project
 
+## Group Information
+Group Number: 21
+Group Members:
+| Name               | Email                 |
+| ------------------ |:--------------------- |
+| Anshuman Medhi     | amedhi@connect.ust.hk |
+| Aaron Si-yuan Wang | aswang@connect.ust.hk |
+
+## How to run the program
+
+
+## Workload Breakdown
+| Name               | Contribution   | Percentage |
+| ------------------ |:-------------- |:---------- |
+| Anshuman Medhi     | Shading        | 50%        |
+| Aaron Si-yuan Wang | User Interface | 50%        |
+
 Lens Parameters:
 
 - Radius of curvature of each surface
@@ -22,3 +39,11 @@ Sort the lenses so that any `X` is rendered after all the lenses that `X` can be
 
 **After rendering all lenses**
 Render the whole scene, treating lenses as normal textured objects
+
+## Libraries Used
+
+| Library | Link                                |
+| ------- |:----------------------------------- |
+| ThreeJS | https://github.com/mrdoob/three.js/ |
+| dat.gui | https://github.com/dataarts/dat.gui |
+| Stats   | https://github.com/mrdoob/stats.js/ |

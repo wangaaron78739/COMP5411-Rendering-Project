@@ -1,0 +1,59 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{utopia}
+\usepackage[round]{natbib}
+%\usepackage[
+%backend=biber,
+%style=plainnat,
+%citestyle=authoryear
+%]{biblatex}
+
+\bibliographystyle{plainnat}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\title[COMP5411 Rendering Project]{COMP5411 Rendering Project \\ Magnifying Lenses}
+\author[Anshuman \& Aaron]{Anshuman Medhi \\ Aaron Si-yuan Wang}
+\date{Group 21}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Project Summary}
+    \begin{block}{Rendering Lenses}
+       \begin{itemize}
+        \item Render a standard scene with objects and lighting, and include interactive magnifying lenses
+        \item Simulate and render all the kinds of distortion associated with lenses
+       \end{itemize} 
+    \end{block}
+\begin{figure}[htpb]
+    \centering
+        \includegraphics[width=0.3\textwidth]{images/mag}
+        %\label{fig:}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Technical Challenges}
+    \begin{block}{Features}
+        \begin{itemize}
+        \item Varying the lighting and objects in the scene behind the lenses
+        \item Varying parameters of the lens (geometric properties)
+        \begin{itemize}
+            \item Calculate the optical parameters from the geometric description
+        \end{itemize}
+        \item Interactively move around the lenses in 3D space
+        \item Simulating light dispersion through the lenses (chromatic aberrations)
+        \item Simulating various kinds of lens distortions (such as barrel or pincushion distortion)
+        \end{itemize}
+    \end{block}
+    \begin{block}{Challenges}
+       \begin{itemize}
+           \item Implement realistic approximations as shaders (rather than ray tracing)
+           \item Calculate optical properties of lenses from (customizable) geometric description
+       \end{itemize} 
+    \end{block}
+\end{frame} 
+
+\end{document}
