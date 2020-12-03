@@ -67,7 +67,7 @@ function addLensesToWorld(cfg, world) {
             vertexShader: getShaderCustom('lens', 'vs'),
             fragmentShader: getShaderCustom('lens', 'ps'),
         }));
-        const lensRing = new THREE.Mesh(new THREE.RingGeometry(0.95, 1, 64), new THREE.MeshBasicMaterial({ color: 0xFF0000 }));
+        const lensRing = new THREE.Mesh(new THREE.RingGeometry(0.95, 1, 64), new THREE.MeshBasicMaterial({ color: 0xffffff }));
         lens.position.copy(newPos);
         lens.scale.set(config.lensDiameter, config.lensDiameter);
         lensRing.position.copy(newPos);
