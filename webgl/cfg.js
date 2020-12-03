@@ -31,8 +31,7 @@ const defaultCfg =
         this.lensesOptions.push({
             lensPosition: new THREE.Vector3(0 * 10.0 - 5.0, 0 * 10.0 - 5.0, Math.floor(1 * 10.0) + minD),
             // lensPosition: new THREE.Vector3(Math.random() * 10.0 - 5.0, Math.random() * 10.0 - 5.0, Math.floor(Math.random() * 10.0) + minD),
-            lensRadius1Neg: false,
-            lensRadius2Neg: false,
+            convex: false,
             lensRadius1: 0.1,
             lensRadius2: 0.1,
             sameRadius: true,
@@ -108,7 +107,7 @@ function initConfig() {
         })
     );
 
-    cube.name = 'cube';
+    cube.name = 'Cube';
     cube.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
     cube.position.y = -12;
 
@@ -116,7 +115,7 @@ function initConfig() {
 
     world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(20, 30, 128),
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(10, 20, 128),
         new THREE.ShaderMaterial({
             uniforms: THREE.UniformsUtils.merge([
                 THREE.UniformsLib["lights"],
@@ -136,11 +135,37 @@ function initConfig() {
         })
     );
 
-    cone.name = 'cone';
+    cone.name = 'Cone';
     cone.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
-    cone.position.y = +10.0;
-    // cone.position.set(new THREE.Vector3(0.0, 0.0, 0));
+    cone.position.y = 15.0;
+    cone.position.x = 15.0;
     world.objects.push(cone);
+
+    const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 20),
+        new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.merge([
+                THREE.UniformsLib["lights"],
+                {
+                    mAmbient: { type: "c", value: new THREE.Color(0xff0000) }, //0x00dd00, // should generally match color
+                    mDiffuse: { type: "c", value: new THREE.Color(0xff0000) }, //0x00dd00, 
+                    mSpecular: { type: "c", value: new THREE.Color(0xffffff) },
+                    mShininess: { type: "f", value: 40.0 },
+                    mKa: { type: "f", value: 0.3 },
+                    mKd: { type: "f", value: 0.8 },
+                    mKs: { type: "f", value: 0.8 }
+                }
+            ]),
+            lights: true,
+            vertexShader: getShader(cfg, 'vs'),
+            fragmentShader: getShader(cfg, 'ps'),
+        })
+    );
+
+    cylinder.name = 'Cylinder';
+    cylinder.matrixWorld.setPosition(new THREE.Vector3(0.0, 0.0, 0.0));
+    cylinder.position.y = 15.0;
+    cylinder.position.x = -15.0;
+    world.objects.push(cylinder);
 
     world.objects.forEach(object => object.geometry.computeFlatVertexNormals());
 
@@ -158,7 +183,7 @@ function initConfig() {
     const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x333333, specular: 0x000000, map: groundTexture, side: THREE.DoubleSide });
     ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000, 2000), groundMaterial);
     ground.rotation.x = - Math.PI / 2;
-    ground.position.y = -20;
+    ground.position.y = -200;
 
     world.environment.push(ground);
     for (let [x, y, z] of [[1, 1, 0], [-1, 1, 0], [0, 0, -1], [0, 0, 1]]) {
