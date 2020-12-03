@@ -22,7 +22,7 @@ function initControls(camera, cameraPerspective, renderer, world) {
     orbitControls.dampingFactor = 0.15;
     orbitControls.screenSpacePanning = false;
     orbitControls.minDistance = 50;
-    orbitControls.maxDistance = 500;
+    orbitControls.maxDistance = 200;
     orbitControls.maxPolarAngle = Math.PI / 2;
 
     const dragControls = new THREE.DragControls(world.lenses, cameraPerspective, renderer.domElement);
@@ -43,8 +43,8 @@ function refreshLensShaders(obj) {
     lensRing.material.needsUpdate = true;
 
     const config = cfg.lensesOptions[obj.idx];
-    obj.material.uniforms.lensRadius1.value = (config.lensRadius1Neg ? -1.0 : 1.0) / config.lensRadius1;
-    obj.material.uniforms.lensRadius2.value = (config.lensRadius2Neg ? -1.0 : 1.0) / config.lensRadius2;
+    obj.material.uniforms.lensRadius1.value = (config.convex ? -1.0 : 1.0) / config.lensRadius1;
+    obj.material.uniforms.lensRadius2.value = (config.convex ? -1.0 : 1.0) / config.lensRadius2;
     obj.material.uniforms.lensDiameter.value = config.lensDiameter;
     obj.material.uniforms.lensWidth.value = config.lensWidth;
 
@@ -144,24 +144,21 @@ function setDiameterBound(gui, lens, value, lensId, maxId) {
 
 function makeLensControls(gui, cfg, lens, lensId, maxId) {
     var gLens = gui.addFolder(`Lens ${lensId}`);
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(0.001).max(1.0).step(0.0001).name('Curvature 1').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1').min(0.01).max(1.0).step(0.0001).name('Curvature 1').listen().onChange(function (value) {
         if (cfg.lensesOptions[lensId].sameRadius) {
             cfg.lensesOptions[lensId].lensRadius2 = cfg.lensesOptions[lensId].lensRadius1;
         }
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius1Neg').name('Curvature 1 Pos').listen().onChange(function (value) {
-        refreshLensShaders(lens);
-    });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(0.001).max(1.0).step(0.0001).name('Curvature 2').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2').min(0.01).max(1.0).step(0.0001).name('Curvature 2').listen().onChange(function (value) {
         if (cfg.lensesOptions[lensId].sameRadius) {
             cfg.lensesOptions[lensId].lensRadius1 = cfg.lensesOptions[lensId].lensRadius2;
         }
         updateMagnify(gui, lens, value, lensId, maxId);
         setRadiusBound(gui, lens, value, lensId, maxId);
     });
-    gLens.add(cfg.lensesOptions[lensId], 'lensRadius2Neg').name('Curvature 2 Pos').listen().onChange(function (value) {
+    gLens.add(cfg.lensesOptions[lensId], 'convex').name('Convex').listen().onChange(function (value) {
         refreshLensShaders(lens);
     });
     gLens.add(cfg.lensesOptions[lensId], 'lensWidth').min(0.0).max(10.0).step(0.05).name('Width').listen().onChange(function (value) { updateMagnify(gui, lens, value, lensId, maxId); });
@@ -239,7 +236,6 @@ function makeGui(cfg, world) {
     var gMagnify = gui.addFolder('Lens');
     gMagnify.add({ func: function () { cfg.addLens(); reload(gui, cfg, world); } }, "func").name("Add Lens");
     gMagnify.add({ func: function () { cfg.removeLens(); reload(gui, cfg, world); } }, "func").name("Remove Lens");
-    // world.lenses.forEach((lens, idx) => { makeLensControls(gMagnify, cfg, lens, idx, world.lenses.length - 1); });
 
     var gLight = gui.addFolder('Lights');
     world.lights.forEach((light, idx) => { makeLightControls(gLight, cfg, light, idx); });
@@ -249,23 +245,8 @@ function makeGui(cfg, world) {
         world.objects.forEach(element => {
             refreshShaders(element);
         });
-        if (cfg.shaderVis) {
-            document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
-            document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
-        }
-    });
-    gShaders.add(cfg, 'shaderVis').name('view shaders').listen().onChange(function (value) {
-        var e = document.getElementById('splash');
-        if (value == false)
-            e.style.display = 'none';
-        else {
-            document.getElementById('vstext').innerHTML = document.getElementById(cfg.shaderRoot + '-vs-glsl').textContent;
-            document.getElementById('pstext').innerHTML = document.getElementById(cfg.shaderRoot + '-ps-glsl').textContent;
-            e.style.display = 'block';
-        }
     });
 
-    gui.add(cfg, 'animate').name('animate (a)').listen();
     gui.add(cfg, 'lensBorder').name('Draw Lens Border').listen().onChange(function (value) {
         refreshAllLenses(world);
     });
