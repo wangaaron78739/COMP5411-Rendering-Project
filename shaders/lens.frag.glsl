@@ -1,4 +1,3 @@
-varying vec2 vUv;
 uniform sampler2D tDiffuse;
 uniform float lensRadius1;
 uniform float lensRadius2;

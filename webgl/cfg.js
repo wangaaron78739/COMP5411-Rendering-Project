@@ -214,7 +214,7 @@ function getSourceSynch(url) {
 };
 
 function getShaderCustom(name, ty) {
-    return getSourceSynch(document.getElementById(`${name}-${ty}-glsl`).src);
+    return document.getElementById(`${name}-${ty}-glsl`).textContent;
 }
 function getShader(cfg, ty) {
     return getShaderCustom(cfg.shaderRoot, ty);
