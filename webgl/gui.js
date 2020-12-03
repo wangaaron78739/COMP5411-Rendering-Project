@@ -49,12 +49,12 @@ function refreshLensShaders(obj) {
     obj.material.uniforms.lensWidth.value = config.lensWidth;
 
     let pos = obj.material.uniforms.lensPosition.value;
-    pos.copy(obj.position);
-
     pos = obj.getWorldPosition(pos);
     pos.project(cameraPerspective);
+
     let widthHalf = obj.material.uniforms.screen.value.x / 2;
     let heightHalf = obj.material.uniforms.screen.value.y / 2;
+
     pos.x = (pos.x * widthHalf) + widthHalf;
     pos.y = (pos.y * heightHalf) + heightHalf;
     // pos.z = -obj.position.z;
