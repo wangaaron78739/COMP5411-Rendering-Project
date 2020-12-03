@@ -14,8 +14,10 @@ You must run a server that to serve the `index.html`, `tex/` and `shaders/` file
 
 The simplest way is to use the python builting http server 
 
+```bash
    # In the root of this project folder run
    python -m http.server
+```
 
 
 ## Workload Breakdown
