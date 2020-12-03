@@ -23,7 +23,7 @@ The simplest way is to use the python builtin http server
 ## Workload Breakdown
 | Name               | Contribution                                 | Percentage |
 | ------------------ |:---------------------------------------------|:---------- |
-| Anshuman Medhi     | Most of the lens fragment shader code        | 50%        |
+| Anshuman Medhi     | Writina debugging the lens fragment shader   | 50%        |
 | Aaron Si-yuan Wang | Controls, UI and Scene, Debugging the Shader | 50%        |
 
 Lens Parameters:
