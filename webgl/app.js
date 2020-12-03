@@ -57,6 +57,8 @@ function genLensScenes(world) {
         })(sceneScreen);
 
         world.lenses[idx].material.uniforms.tDiffuse.value = prevTexture.texture;
+        sceneTotal.add(world.lenses[idx]);
+        sceneTotal.add(world.lensRings[idx]);
 
         const sceneTotal = new THREE.Scene();
         // Add lenses (textured semispheres) to sceneTotal
@@ -64,10 +66,9 @@ function genLensScenes(world) {
         const lens = { screen: sceneScreen, total: sceneTotal, tex: nextTexture };
         lensScenes.push(lens);
         prevTexture = nextTexture;
-        sceneTotal.add(world.lenses[idx]);
-        sceneTotal.add(world.lensRings[idx]);
     }
     lensScenes[world.lenses.length - 1].tex = null; //render last lens to screen 
+    // lensScenes[0].tex = null; //render last lens to screen 
 }
 
 function renderTo(target, fn) {

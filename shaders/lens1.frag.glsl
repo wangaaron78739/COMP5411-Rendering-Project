@@ -28,11 +28,11 @@ vec3 rayplane(vec3 orig,vec3 ray,float wallZ){
 }
 
 void main(){
-    float flip = -1.;
+    float flip = 1.;
     // float wallZ=100.;
     float wallZ=gl_FragCoord.z;
-    float Radius1=lensRadius1*100.;
-    float Radius2=lensRadius2*100.;
+    float Radius1=lensRadius1*100000.;
+    float Radius2=lensRadius2*100000.;
     float Diameter=lensDiameter*100.;
     
     float tmp1=sqrt(Radius1*Radius1-Diameter*Diameter/4.)*sign(Radius1)*flip;
@@ -66,8 +66,9 @@ void main(){
         intersection2=raycirc(intersection1.xyz,ray2,lensCenter2,Radius2,-flip);
         normal2=normalize(intersection2.xyz-lensCenter2);
         
-        // ray3=ray2;
-        ray3=refract(ray2,normal2,1./eta_i);
+        ray3=ray2;
+        // ray3=refract(ray2,normal2,1./eta_i);
+        // ray3=refract(ray2,normal2,eta_i);
         
         intersection3=rayplane(intersection2.xyz,ray3,wallZ);
         
